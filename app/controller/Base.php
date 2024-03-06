@@ -1,0 +1,879 @@
+<?php
+
+namespace app\controller;
+
+use Exception;
+
+class Base
+{
+
+    /**
+     * 软件名称
+     */
+    static $app_name = 'LTPP在线开发平台';
+
+    /**
+     * 代码提交成功提示
+     */
+    static $code_up_success_msg = '代码提交成功';
+
+    /**
+     * 代码提交失败提示
+     */
+    static $code_up_fail_msg = '代码提交失败！请重新提交！';
+
+    /**
+     * 判题机路径
+     */
+    static $judgepath = '/JudgeServer/judge';
+
+    /**
+     * 默认请求头
+     */
+    static $default_http_header = ['Content-Type:application/x-www-form-urlencoded'];
+
+    /**
+     * 服务器地址
+     */
+    static $GLOBlinuxurl = 'http://127.0.0.1:8787';
+
+    /**
+     * ltpp用户id
+     */
+    static $ltpp_linux_user_id = 1000;
+
+    /**
+     * 文字编码
+     */
+    static $str_encoding = 'UTF-8,GBK,GB2312,BIG5';
+
+    /**
+     * 代码安全信息
+     */
+    static $code_safe = 'safe';
+
+    /**
+     * 判题机安装路径
+     */
+    static $judge_install_path = '/JudgeServer/';
+
+    /**
+     * 判题机名称
+     */
+    static $judge_name = 'judge';
+
+    /**
+     * 服务器异常提示
+     */
+    static $server_error_msg = '服务器异常';
+
+    /**
+     * 沙箱地址
+     */
+    static $sandbox_path = '/home/LTPPSANDBOX/';
+
+    /**
+     * 判题机用户代码运行状态码
+     */
+    static $judge_code_error = -1;
+
+    /**
+     * 判题机异常状态码
+     */
+    static $judge_server_error = 0;
+
+    /**
+     * 判题机用户代码运行完成状态码
+     */
+    static $judge_code_finish = 1;
+
+    /**
+     * 判题机用户代码运行TLE状态码
+     */
+    static $judge_code_tle = 2;
+
+    /**
+     * 判题机用户代码运行MLE状态码
+     */
+    static $judge_code_mle = 3;
+
+    /**
+     * 判题机用户代码运行RE状态码
+     */
+    static $judge_code_re = 4;
+
+    /**
+     * 测试用例路径
+     */
+    static $testdata_path = '/tmp/testdata/';
+
+    /**
+     * 可识别的语言
+     */
+
+    static $oj_judge_language = [
+        'C',
+        'C++',
+        'Java',
+        'Python3',
+        'Go',
+        'PHP',
+        'JavaScript',
+        'Rust',
+        'TypeScript',
+        'C#',
+        'Ruby'
+    ];
+
+    /**
+     * 语言转markdown可识别的语言
+     */
+
+    static $map_language_to_markdown = [
+        'C' => 'c',
+        'C++' => 'cpp',
+        'Java' => 'java',
+        'Python3' => 'python',
+        'Go' => 'go',
+        'PHP' => 'php',
+        'JavaScript' => 'javascript',
+        'Rust' => 'rust',
+        'TypeScript' => 'typescript',
+        'C#' => 'csharp',
+        'Ruby' => 'ruby'
+    ];
+
+    /**
+     * 代码文件后缀对应语言
+     */
+    static $map_language_file = [
+        'c' => 'c',
+        'h' => 'cpp',
+        'cc' => 'cpp',
+        'cpp' => 'cpp',
+        'java' => 'java',
+        'py' => 'python',
+        'go' => 'golang',
+        'php' => 'php',
+        'js' => 'javascript',
+        'rs' => 'rust',
+        'ts' => 'typescript',
+        'cs' => 'csharp',
+        'rb' => 'ruby',
+        'css' => 'css',
+        'sh' => 'bash',
+        'dll' => 'csharp',
+        'm' => 'objectivec',
+        'sql' => 'sql',
+        'vb' => 'vbnet',
+        'kt' => 'kotlin',
+        'json' => 'json',
+        'pas' => 'delphi',
+        'html' => 'html',
+        'yaml' => 'yaml',
+        'lock' => 'yaml',
+        'jsx' => 'javascript',
+        'vue' => 'javascript',
+        'tsx' => 'typescript'
+    ];
+
+    /**
+     * 代码输出内容长度限制
+     * @var int $code_out_limit 文章内容长度限制
+     */
+    static $code_out_limit = 10000;
+
+    /**
+     * LTPP文件夹绝对路径
+     * @var string $LTPP_path LTPP文件夹绝对路径
+     */
+    static $LTPP_path = '/home/LTPP/';
+
+    /**
+     * LTPP_runtime_path
+     * @var string $LTPP_runtime_path LTPP_runtime_path
+     */
+    static $LTPP_runtime_path = '/home/LTPP/LTPPRUNTIME';
+
+    /**
+     * LTPP日志文件夹绝对路径
+     * @var string $LTPP_logs_path LTPP日志文件夹绝对路径
+     */
+    static $LTPP_logs_path = '/home/LTPP/LTPPRUNTIME/logs/';
+
+    /**
+     * LTPP公开文件夹绝对路径
+     * @var string $LTPP_public_path LTPP公开文件夹绝对路径
+     */
+    static $LTPP_public_path = '/home/LTPP/public';
+
+    /**
+     * LTPP static文件夹路径
+     * @var string $LTPP_public_static_path LTPP static文件夹路径
+     */
+    static $LTPP_public_static_path = '/static';
+
+    /**
+     * 保存文件名长度限制
+     * @var string $file_name_length_limit 保存文件名长度限制
+     */
+    static $file_name_length_limit = 100;
+
+    /**
+     * 临时目录
+     */
+    static $tmp_path = '/tmp/';
+
+    /**
+     * 获取字符个数
+     * @param string $str
+     * @return int $length
+     */
+    static public function getStrLen($str = '')
+    {
+        try {
+            preg_match_all("/./u", $str, $matches);
+            $length = count($matches[0]);
+            return $length;
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * 返回404页面
+     */
+    static public function notFoundPage($path = '', $file_extion = '')
+    {
+        $not_found = '';
+        return response($not_found, 404, [
+            'Content-Type' => 'text/html;charset=utf-8',
+            'Accept-Ranges' => 'bytes',
+            'Content-Length' => strlen($not_found),
+            'File-Content-Type' => 'text/html;charset=utf-8',
+            'Content-Encoding' => 'gzip',
+            'File-Path' => $path,
+            'File-Extion' => $file_extion,
+        ]);
+    }
+
+    /**
+     * 发送POST请求
+     * @param string $url 请求地址
+     * @param array $header 请求头
+     * @param array $body 请求体
+     * @param bool $body_type_is_json 请求体是否是json
+     * @return string $res 响应数据
+     */
+    static function postRequest($url = '', $header = [], $body = [], $body_type_is_json = false)
+    {
+        if (!$url) {
+            return '';
+        }
+        $res = '';
+        try {
+            if ($body_type_is_json) {
+                $data_string = json_encode($body);
+            } else {
+                $data_string = http_build_query($body);
+            }
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
+            curl_setopt($ch, CURLOPT_ENCODING, 'UTF-8');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+            curl_setopt($ch, CURLOPT_PROXY, 'http://172.17.0.1:7890');
+            // 禁用 SSL 证书验证
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            // 禁用主机验证
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            $res = curl_exec($ch);
+            if (curl_errno($ch)) {
+                Base::sendErrorNotice('', '发送POST请求异常信息：' . curl_error($ch));
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), '发送POST请求异常信息：' . $e->getMessage());
+        } finally {
+            curl_close($ch);
+        }
+        return $res;
+    }
+
+    /**
+     * 发送GET请求
+     */
+    static function getRequest($url = '', $header = [])
+    {
+        if (!$url) {
+            return '';
+        }
+        $res = '';
+        try {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HTTPGET, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
+            curl_setopt($ch, CURLOPT_ENCODING, 'UTF-8');
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_PROXY, 'http://172.17.0.1:7890');
+            // 禁用 SSL 证书验证
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            // 禁用主机验证
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            $res = curl_exec($ch);
+            if (curl_errno($ch)) {
+                Base::sendErrorNotice('', '发送GET请求异常信息：' . curl_error($ch));
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), '发送GET请求异常信息：' . $e->getMessage());
+        } finally {
+            curl_close($ch);
+        }
+        return $res;
+    }
+
+    /**
+     * 判断路径是否存在（路径以/开头），不存在创建路径中的文件夹
+     * @param string $path 路径
+     * @param int $grade 权限
+     */
+    static public function judgeCreatPath($path, $grade = 0666)
+    {
+        if (file_exists($path)) {
+            return true;
+        }
+        $name = [];
+        $length = strlen($path);
+        // 获取全部名称
+        for ($i = 0; $i < $length; ++$i) {
+            if ($path[$i] == '/') {
+                $tem = '';
+                for ($j = $i + 1; $j < $length; ++$j) {
+                    if ($path[$j] == '/') {
+                        $i = $j - 1;
+                        break;
+                    }
+                    $tem .= $path[$j];
+                    if ($j == $length - 1) {
+                        $i = $j;
+                        break;
+                    }
+                }
+                if ($tem != '') {
+                    $name[] = $tem;
+                }
+            }
+        }
+        $now_path = '/';
+        foreach ($name as &$tem) {
+            $now_path .= $tem . '/';
+            $isfile = strripos($now_path, '.');
+            if (!file_exists($now_path) && $isfile === false && !is_dir($now_path)) {
+                try {
+                    @mkdir($now_path, $grade, true);
+                } catch (Exception $e) {
+                    continue;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 安装沙箱环境
+     */
+    static public function installSandboxEnv()
+    {
+        $path = Base::$sandbox_path;
+        // 清理软连接
+        Base::deleteAllFile($path . 'usr/bin/java');
+        // 创建沙箱目录
+        Base::judgeCreatPath($path);
+        Robot::sendEmail('沙箱创建完成');
+        // 挂载（C#必须这步）
+        $proc_path = $path . 'proc';
+        Base::judgeCreatPath($proc_path);
+        exec('umount ' . $proc_path . ' > /dev/null 2>&1');
+        exec('mount -t proc none ' . $proc_path . ' > /dev/null 2>&1');
+        Robot::sendEmail('/proc目录挂载完成');
+        // 系统时间
+        exec("cp -p -r --parents -f /etc/timezone $path;cp -p -r --parents -f /etc/localtime $path;");
+        Robot::sendEmail('系统时间工具安装完成');
+        // ln安装
+        exec("cp -p -r --parents -f /usr/bin/ln $path");
+        Robot::sendEmail('/usr/bin/ln安装完成');
+        // 环境安装
+        exec("cp -p -r --parents -f /usr/share/ $path");
+        Robot::sendEmail('/usr/share/安装完成');
+        exec("cp -p --parents -f /bin/bash $path;cp -p --parents -f /bin/sh $path;cp -p -r --parents -f /usr/lib/mono $path;cp -p --parents -f /usr/bin/mono $path;cp -p --parents -f /usr/bin/gem $path;cp -p --parents -f /usr/bin/gem3.1 $path;cp -p --parents -f /usr/bin/ruby $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/php $path;cp -p --parents -f /usr/bin/python3 $path;cp -p -r --parents -f /root/.cargo $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/local/nodejs $path;cp -p --parents -f /usr/bin/go $path;cp -p --parents -f /usr/bin/g++ $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /lib64/ld-linux-x86-64.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/librt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libxml2.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libssl.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypto.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpcre2-8.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libz.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libsodium.so.23 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libargon2.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicuuc.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/liblzma.so.5 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicudata.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libruby-3.1.so.3.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgmp.so.10 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libtinfo.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libc.so.6 $path;");
+        exec("cp -p -r --parents -f /usr/lib $path;cp -p -r --parents -f /usr/lib32 $path;cp -p -r --parents -f /usr/lib64 $path;cp -p -r --parents -f /etc/python3 $path;cp -p -r --parents -f /usr/lib/python3 $path;cp -p -r --parents -f /usr/lib/jvm/ $path;cp -p --parents -f /usr/lib/x86_64-linux-gnu/libexpat.so.1 $path;cp -p --parents -f /usr/bin/python3 $path;cp -p --parents -f /etc/alternatives/java $path;cp -p -r --parents -f /etc/ssl/certs/java $path;cp -p --parents -f /var/lib/dpkg/alternatives/java $path;cp -p --parents -f /etc/alternatives/javac $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /var/lib/dpkg/alternatives/javac $path;cp -p --parents -f /etc/alternatives/php $path;cp -p --parents -f /etc/cron.d/php $path;cp -p -r --parents -f /etc/php $path;cp -p -r --parents -f /usr/lib/php $path;cp -p -r --parents -f /usr/include/php $path;cp -p --parents -f /var/lib/dpkg/alternatives/php $path;cp -p -r --parents -f /var/lib/php $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/lib/x86_64-linux-gnu/ruby $path;cp -p -r --parents -f /usr/lib/ruby $path;cp -p --parents -f /usr/bin/ruby $path;");
+        // java安装
+        exec('chroot ' . $path . ' /bin/sh -c "ln -s /usr/lib/jvm/java-17-openjdk-amd64/bin/java /usr/bin/java" > /dev/null 2>&1');
+        Robot::sendEmail('编程运行环境安装完成');
+        // 权限设置
+        exec('chmod -R --no-preserve-root 777 ' . $path . ' > /dev/null 2>&1');
+        Robot::sendEmail('沙箱所有者设置完成');
+        exec('chown -R --no-preserve-root ltpp:ltpp ' . $path . ' > /dev/null 2>&1');
+        Robot::sendEmail('沙箱权限设置完成');
+    }
+
+    /**
+     * 文件（夹）删除
+     * @param string $dir 文件路径
+     * @return bool $res 删除是否成功
+     */
+    static public function deleteAllFile($dir = '/tmp')
+    {
+        //其他文件夹不可删除
+        if (strripos($dir, Base::$sandbox_path) === false) {
+            return false;
+        }
+        try {
+            if (!file_exists($dir)) {
+                return false;
+            }
+            if ($dir == '.' || $dir == '..') {
+                return false;
+            }
+            if (!is_dir($dir)) {
+                @unlink("$dir");
+                return true;
+            }
+            $handle = opendir($dir);
+            while (($file = readdir($handle)) !== false) {
+                if ($file != '.' && $file != '..') {
+                    Base::deleteAllFile("$dir/$file");
+                }
+            }
+            closedir($handle);
+            @rmdir($dir);
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), 'deleteAllFile执行出错：' . $e->getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 判断是否是Docker环境
+     */
+    static public function judgeIsDocker()
+    {
+        try {
+            $is_in_docker = file_exists('/.dockerenv') ||
+                (file_exists('/proc/1/cgroup') && is_file('/proc/1/cgroup') &&
+                    strpos(file_get_contents('/proc/1/cgroup'), 'docker') !== false);
+            if ($is_in_docker) {
+                return true;
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return false;
+        }
+        return false;
+    }
+
+    /**
+     * @param string $code
+     * @param string $userlanguage
+     */
+    static public function judgeCodeSafe($code, $userlanguage)
+    {
+        if (!$code) {
+            return [
+                'code' => -1,
+                'msg' => '请编写代码后再次提交哦！',
+                'code_id' => 0
+            ];
+        }
+        switch ($userlanguage) {
+            case 'C':
+                break;
+            case 'C++':
+                break;
+            case 'Java':
+                break;
+            case 'Python3':
+                break;
+            case 'Go':
+                break;
+            case 'PHP':
+                break;
+            case 'JavaScript':
+                break;
+            case 'Rust':
+                break;
+            case 'TypeScript':
+                break;
+            case 'C#':
+                break;
+            case 'Ruby':
+                break;
+            default:
+                return [
+                    'code' => -1,
+                    'msg' => '请选择语言后提交！',
+                    'code_id' => 0
+                ];
+        }
+        return [
+            'code' => 1,
+            'msg' => Base::$code_safe,
+            'code_id' => 0
+        ];
+    }
+
+    /**
+     * 判断判题机是否安装
+     */
+    static public function judgeJudgeInstall()
+    {
+        $path_judge = Base::$judge_install_path . Base::$judge_name;
+        $path_sandbox = Base::$sandbox_path;
+        try {
+            $has_judge = file_exists($path_judge);
+            $has_sandbox = file_exists($path_sandbox);
+            if ($has_judge && $has_sandbox) {
+                return true;
+            }
+            Base::deleteAllFile(Base::$judge_install_path);
+            Base::judgeCreatPath(Base::$judge_install_path);
+            exec('cp -f /home/LTPP/InstallMust/JudgeServer/judge ' . Base::$judge_install_path . ' 2>&1', $out);
+            Base::chmodFile('/JudgeServer', 0555);
+            if (!empty($out)) {
+                $res = '';
+                foreach ($out as $tem) {
+                    $res .= $tem . "\n";
+                }
+                Base::sendErrorNotice(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT), '判题机安装出错：' . $res);
+                return false;
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), '判题机安装出错：' . $e->getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 修改权限
+     * @param string $path
+     * @param int $num
+     */
+    static public function chmodFile($path, $num = 0444)
+    {
+        try {
+            if (!file_exists($path)) {
+                return;
+            }
+            if ($path == '.' || $path == '..') {
+                return;
+            }
+            if (!is_dir($path)) {
+                chmod($path, $num);
+                return;
+            }
+            $dirs = scandir($path);
+            foreach ($dirs as &$tem) {
+                if ($tem == '.' || $tem == '..') {
+                    continue;
+                }
+                $tempath = $path . '/' . $tem;
+                Base::chmodFile($tempath, $num);
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return;
+        }
+    }
+
+    /**
+     * 修改所有者
+     * @param string $path
+     * @param int $num
+     */
+    static public function chownFile($path, $user_id)
+    {
+        try {
+            if (!file_exists($path)) {
+                return;
+            }
+            if ($path == '.' || $path == '..') {
+                return;
+            }
+            if (!is_dir($path)) {
+                chown($path, $user_id);
+                return;
+            }
+            $dirs = scandir($path);
+            foreach ($dirs as &$tem) {
+                if ($tem == '.' || $tem == '..') {
+                    continue;
+                }
+                $tempath = $path . '/' . $tem;
+                Base::chownFile($tempath, $user_id);
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return;
+        }
+    }
+
+    /**
+     * 写入文件
+     * @param string $file 文件路径
+     * @param string $content 写入的内容
+     */
+    static public function writeToFile($file, $content = '')
+    {
+        Base::judgeCreatPath($file);
+        while (1) {
+            try {
+                $result = file_put_contents($file, $content);
+                if ($result !== false) {
+                    // 写入成功
+                    return;
+                }
+            } catch (Exception $e) {
+                continue;
+            }
+        }
+    }
+
+    /**
+     * 编译器
+     * @param string $userlanguage
+     * @param string $code
+     * @param string $filepath
+     * @param string $runcodefilepath
+     * @return array $res
+     */
+    static public function compiler($userlanguage, $code, $filepath, $runcodefilepath)
+    {
+        $out = [];
+        try {
+            //编译
+            switch ($userlanguage) {
+                case 'Java':
+                    $runcodefilepath = $filepath . 'Main';
+                    Base::writeToFile($runcodefilepath . '.java', $code);
+                    exec('/usr/bin/javac -J-Dfile.encoding=UTF-8 ' . $runcodefilepath . '.java 2>&1', $out);
+                    break;
+                case 'C++':
+                    Base::writeToFile($runcodefilepath . '.cpp', $code);
+                    exec('/usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.cpp -std=c++2a 2>&1', $out);
+                    break;
+                case 'C':
+                    Base::writeToFile($runcodefilepath . '.c', $code);
+                    exec('/usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.c -std=c++2a 2>&1', $out);
+                    break;
+                case 'Go':
+                    exec('/usr/bin/go env -w GO111MODULE=auto');
+                    Base::writeToFile($runcodefilepath . '.go', $code);
+                    exec('/usr/bin/go build -o ' . $filepath . ' ' . $runcodefilepath . '.go 2>&1', $out);
+                    break;
+                case 'Rust':
+                    Base::writeToFile($runcodefilepath . '.rs', $code);
+                    exec('/root/.cargo/bin/rustc -O -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.rs 2>&1', $out);
+                    break;
+                case 'C#':
+                    Base::writeToFile($runcodefilepath . '.cs', $code);
+                    exec('/usr/bin/mcs -out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs 2>&1', $out);
+                    break;
+                case 'TypeScript':
+                    Base::writeToFile($runcodefilepath . '.ts', $code);
+                    exec('/usr/local/nodejs/bin/tsc -t es2022 --outFile ' . $runcodefilepath . '.js ' . $runcodefilepath . '.ts 2>&1', $out);
+                    break;
+                case 'Python3':
+                    Base::writeToFile($runcodefilepath . '.py', $code);
+                    break;
+                case 'PHP':
+                    Base::writeToFile($runcodefilepath . '.php', $code);
+                    break;
+                case 'JavaScript':
+                    Base::writeToFile($runcodefilepath . '.js', $code);
+                    break;
+                case 'Ruby':
+                    Base::writeToFile($runcodefilepath . '.rb', $code);
+                    break;
+                default:
+                    return ['code' => -1, 'result' => '请选择语言后提交！', 'usememory' => 0, 'usetime' => 0];
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return ['code' => -1, 'result' => '判题机异常！' . $e->getMessage(), 'usememory' => 0, 'usetime' => 0];
+        }
+        return ['code' => 1, 'result' => $out, 'usememory' => 0, 'usetime' => 0];
+    }
+
+    /**
+     * 运行
+     * @param string $userlanguage
+     * @param string $filepath
+     * @param string $inpath
+     * @param string $outpath
+     * @param string $errpath
+     * @param string $runcodefilepath
+     * @param int $limittime
+     * @param int limitmemory
+     */
+    static public function run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory)
+    {
+        try {
+            switch ($userlanguage) {
+                case 'Java':
+                    exec(Base::$judgepath . ' /usr/bin/java@-cp@' . $filepath . '@Main ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'Python3':
+                    exec(Base::$judgepath . ' /usr/bin/python3@' . $runcodefilepath . '.py ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'C++':
+                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'C':
+                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'Go':
+                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'PHP':
+                    exec(Base::$judgepath . ' /usr/bin/php@' . $runcodefilepath . '.php ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'JavaScript':
+                    exec(Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'TypeScript':
+                    exec(Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'Ruby':
+                    exec(Base::$judgepath . ' /usr/bin/ruby@' . $runcodefilepath . '.rb ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    break;
+                case 'C#':
+                    exec(Base::$judgepath . ' /usr/bin/mono@' . $runcodefilepath . ' ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                case 'Rust':
+                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                default:
+                    break;
+            }
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return $out;
+        }
+        return $out;
+    }
+
+    /**
+     * 获取文本
+     */
+    static public function getFileText($file_path)
+    {
+        $text = '';
+        if (file_exists($file_path)) {
+            $text = file_get_contents($file_path);
+        }
+        return Base::textToSafeText($text);
+    }
+
+    /**
+     * 文本安全转换
+     */
+    static public function textToSafeText($text = '')
+    {
+        try {
+            $encoding = mb_detect_encoding($text);
+            if (!$encoding) {
+                $encoding = Base::$str_encoding;
+            }
+            $text = mb_convert_encoding($text, 'UTF-8', $encoding);
+            return $text;
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * 获取用户代码状态，消耗的时间和内存
+     * @param string $str
+     * @return array $res
+     */
+    static public function getCodeTimeMemory($str)
+    {
+        $status = 0;
+        $time_used = 0;
+        $memory_used = 0;
+        $msg = '';
+        try {
+            $res = json_decode($str, true);
+            $status = (int) $res['status'] ?? 0;
+            $time_used = (int) $res['time_used'] ?? 0;
+            $memory_used = (int) $res['memory_used'] ?? 0;
+            $msg = $res['msg'] ?? '';
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            // 触发错误的情况是判题机输出 Segmentation fault (core dumped) 导致解析json失败 而判题机触发该错误是不断分配内存不回收触发安全机制导致程序崩溃
+            // 由于具体分配内存大小不确定，所以按照 RE 处理
+            return ['status' => 4, 'time_used' => $time_used, 'memory_used' => $memory_used, 'msg' => $msg];
+        }
+        return ['status' => $status, 'time_used' => $time_used, 'memory_used' => $memory_used, 'msg' => $msg];
+    }
+
+    /**
+     * DEBUG
+     * @param * $trace trace
+     */
+    static public function debugTrace(&$trace = false)
+    {
+        $res = '';
+        try {
+            if ($trace === false) {
+                return '';
+            }
+            return json_encode($trace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            Robot::sendEmail('<h4>' . Base::$app_name . '运行错误</h4><br><strong>Trace信息</strong><br>' . json_encode(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)) . '<br><strong>报错信息</strong><br>' . $e->getMessage());
+        }
+        return $res;
+    }
+
+    /**
+     * 发送错误通知
+     */
+    static public function sendErrorNotice($trace = false, $msg = '')
+    {
+        try {
+            if ($trace === false) {
+                return;
+            }
+            $trace_str = $trace;
+            if (is_array($trace) || is_object($trace)) {
+                $trace_str = Base::debugTrace($trace);
+            }
+            if (is_array($msg) || is_object($msg)) {
+                $msg = Base::debugTrace($msg);
+            }
+            if (!$trace_str) {
+                $trace_str = '暂无Trace信息';
+            }
+            if (!$msg) {
+                $msg = '暂无报错信息';
+            }
+            $now = date('Y-m-d H:i:s', time());
+            Robot::sendEmail(
+                '<h4>' . Base::$app_name . '运行错误【' . $now
+                    . '】</h4><br><strong>报错信息</strong><br><pre style="white-space:pre-wrap;word-wrap:break-word;">'
+                    . $msg .
+                    '</pre><br><strong>Trace信息</strong><br><pre style="white-space:pre-wrap;word-wrap:break-word;">'
+                    . $trace_str . '</pre>'
+            );
+        } catch (Exception $e) {
+            Robot::sendEmail($e->getMessage());
+        }
+    }
+};
