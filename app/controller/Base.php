@@ -43,11 +43,6 @@ class Base
     static $str_encoding = 'UTF-8,GBK,GB2312,BIG5';
 
     /**
-     * 404
-     */
-    static $not_found = '';
-
-    /**
      * 代码安全信息
      */
     static $code_safe = 'safe';
@@ -212,12 +207,15 @@ class Base
      */
     static public function notFoundPage($path = '', $file_extion = '')
     {
-        Base::$not_found = '';
-        return response(Base::$not_found, 200, [
-            'Content-Type' => 'text/html;charset=utf-8',
+        $res = json_encode(
+            ['code' => -1, 'data' => Base::$server_error_msg, 'time' => 0, 'memory' => 0],
+            JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        );
+        return response($res, 200, [
+            'Content-Type' => 'application/json;charset=utf-8',
             'Accept-Ranges' => 'bytes',
-            'Content-Length' => strlen(Base::$not_found),
-            'File-Content-Type' => 'text/html;charset=utf-8',
+            'Content-Length' => strlen($res),
+            'File-Content-Type' => 'application/json;charset=utf-8',
             'File-Path' => $path,
             'File-Extion' => $file_extion,
         ]);
@@ -647,13 +645,13 @@ class Base
                     Base::writeToFile($runcodefilepath . '.rb', $code);
                     break;
                 default:
-                    return ['code' => -1, 'result' => '请选择语言后提交！', 'usememory' => 0, 'usetime' => 0];
+                    return ['code' => -1, 'data' => '请选择语言后提交！', 'usememory' => 0, 'usetime' => 0];
             }
         } catch (Exception $e) {
             Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
-            return ['code' => -1, 'result' => '判题机异常！' . $e->getMessage(), 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => '判题机异常！' . $e->getMessage(), 'usememory' => 0, 'usetime' => 0];
         }
-        return ['code' => 1, 'result' => $out, 'usememory' => 0, 'usetime' => 0];
+        return ['code' => 1, 'data' => $out, 'usememory' => 0, 'usetime' => 0];
     }
 
     /**

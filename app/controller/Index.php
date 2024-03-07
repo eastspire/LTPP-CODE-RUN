@@ -22,8 +22,7 @@ class Index
         if (!Base::judgeJudgeInstall()) {
             return json(['code' => -1, 'code_id' => '', 'msg' => '判题机未安装']);
         }
-        $this->run($code, $userlanguage, $testin);
-        return json(['code' => -1, 'code_id' => '', 'msg' => Base::$code_up_fail_msg]);
+        return $this->run($code, $userlanguage, $testin);
     }
 
     /**
@@ -69,7 +68,7 @@ class Index
             return $compiler_res_json;
         }
 
-        $out = $compiler_res_json['result'];
+        $out = $compiler_res_json['data'];
         if (!empty($out)) {
             Base::deleteAllFile($filepath);
             $code = $code . "\n\n\n报错详情：\n";
@@ -86,7 +85,7 @@ class Index
             Base::removeBr($err_data);
             $code .= $err_data;
             $res_data .= $err_data;
-            return ['code' => -1, 'result' => $res_data, 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => $res_data, 'usememory' => 0, 'usetime' => 0];
         }
 
         $out = [];
@@ -95,12 +94,12 @@ class Index
         $out = Base::run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory);
 
         if (!$out || empty($out)) {
-            return ['code' => -1, 'result' => '判题机运行异常！', 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => '判题机运行异常！', 'usememory' => 0, 'usetime' => 0];
         }
         $out = $out[0];
         $run_resource_consumption = Base::getCodeTimeMemory($out);
         if (!$run_resource_consumption || !isset($run_resource_consumption['status'])) {
-            return ['code' => -1, 'result' => '判题机运行异常！', 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => '判题机运行异常！', 'usememory' => 0, 'usetime' => 0];
         }
 
         $status = $run_resource_consumption['status'] ?? 0;
@@ -109,7 +108,7 @@ class Index
 
         if ($status == Base::$judge_server_error) {
             $msg = $run_resource_consumption['msg'];
-            return ['code' => -1, 'result' => '判题机运行异常！' . "\n" . $msg, 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => '判题机运行异常！' . "\n" . $msg, 'usememory' => 0, 'usetime' => 0];
         }
 
         if ($status == Base::$judge_code_error) {
@@ -132,7 +131,7 @@ class Index
             $err_data .= $resout;
             return [
                 'code' => -1,
-                'result' => $err_data,
+                'data' => $err_data,
                 'usetime' => $time_used,
                 'usememory' => $memory_used
             ];
@@ -153,17 +152,17 @@ class Index
         switch ($status) {
             case Base::$judge_code_tle:
                 Base::deleteAllFile($filepath);
-                return ['code' => -1, 'result' => 'TLE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'usetime' => $time_used, 'usememory' => $memory_used];
+                return ['code' => -1, 'data' => 'TLE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'usetime' => $time_used, 'usememory' => $memory_used];
             case Base::$judge_code_mle:
                 Base::deleteAllFile($filepath);
-                return ['code' => -1, 'result' => 'MLE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'usetime' => $time_used, 'usememory' => $memory_used];
+                return ['code' => -1, 'data' => 'MLE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'usetime' => $time_used, 'usememory' => $memory_used];
             case Base::$judge_code_re:
                 Base::deleteAllFile($filepath);
-                return ['code' => -1, 'result' => 'RE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'usetime' => $time_used, 'usememory' => $memory_used];
+                return ['code' => -1, 'data' => 'RE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'usetime' => $time_used, 'usememory' => $memory_used];
             default:
                 break;
         }
         Base::deleteAllFile($filepath);
-        return ['code' => 1, 'result' => $resout, 'usetime' => $time_used, 'usememory' => $memory_used];
+        return ['code' => 1, 'data' => $resout, 'usetime' => $time_used, 'usememory' => $memory_used];
     }
 }

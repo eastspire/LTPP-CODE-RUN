@@ -36,23 +36,26 @@ class LTPPErrorHandler extends ExceptionHandler
             if (($exception instanceof BusinessException) && ($response = $exception->render($request))) {
                 return $response;
             }
-            $err_code = $exception->getCode();
             if ($request->expectsJson()) {
                 $json = [
                     'code' => -1,
-                    'err_code' => $err_code,
-                    'msg' => $this->debug ? $exception->getMessage() : Base::$server_error_msg,
-                    'data' => [],
+                    'data' => Base::$server_error_msg,
+                    'time' => 0,
+                    'memory' => 0
                 ];
                 $this->debug && $json['traces'] = (string)$exception;
                 return new Response(
                     200,
                     ['Content-Type' => 'application/json'],
-                    json_encode($json, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+                    json_encode(
+                        $json,
+                        JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+                    )
                 );
             }
-            $error = $this->debug ? nl2br((string)$exception) : Base::notFoundPage();
-            return new Response(500, [], $error);
+            if ($this->debug) {
+                return new Response(200, [], nl2br((string)$exception));
+            }
         } catch (Throwable $e) {
             Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
         }
