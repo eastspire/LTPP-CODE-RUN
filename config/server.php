@@ -24,7 +24,7 @@
  */
 
 return [
-    'listen' => 'http://0.0.0.0:48787',
+    'listen' => 'http://0.0.0.0:8787',
     'transport' => 'tcp',
     'context' => [],
     'name' => 'LTPP',

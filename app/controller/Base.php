@@ -518,7 +518,7 @@ class Base
             default:
                 return [
                     'code' => -1,
-                    'msg' => '请选择语言后提交！',
+                    'msg' => '该语言不支持！请重新选择语言后提交！',
                     'code_id' => 0
                 ];
         }
