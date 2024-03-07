@@ -20,7 +20,7 @@ class Index
             return json($check_safe_json);
         }
         if (!Base::judgeJudgeInstall()) {
-            return json(['code' => -1, 'code_id' => '', 'msg' => '判题机未安装']);
+            return ['code' => -1, 'data' => '判题机未安装', 'usememory' => 0, 'usetime' => 0];
         }
         return $this->run($code, $userlanguage, $testin);
     }

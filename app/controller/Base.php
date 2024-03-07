@@ -428,11 +428,7 @@ class Base
     static public function judgeCodeSafe($code, $userlanguage)
     {
         if (!$code) {
-            return [
-                'code' => -1,
-                'msg' => '请编写代码后再次提交哦！',
-                'code_id' => 0
-            ];
+            return ['code' => -1, 'data' => '请编写代码后再次提交哦！', 'usememory' => 0, 'usetime' => 0];
         }
         switch ($userlanguage) {
             case 'C':
@@ -458,17 +454,9 @@ class Base
             case 'Ruby':
                 break;
             default:
-                return [
-                    'code' => -1,
-                    'msg' => '该语言不支持！请重新选择语言后提交！',
-                    'code_id' => 0
-                ];
+                return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'usememory' => 0, 'usetime' => 0];
         }
-        return [
-            'code' => 1,
-            'msg' => Base::$code_safe,
-            'code_id' => 0
-        ];
+        return ['code' => 1, 'data' => Base::$code_safe, 'usememory' => 0, 'usetime' => 0];
     }
 
     /**
