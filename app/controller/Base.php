@@ -4,6 +4,21 @@ namespace app\controller;
 
 use Exception;
 
+class Language
+{
+    const c = 'c';
+    const cpp = 'cpp';
+    const php = 'php';
+    const java = 'java';
+    const javascript = 'javascript';
+    const typescript = 'typescript';
+    const ruby = 'ruby';
+    const rust = 'rust';
+    const python = 'python';
+    const golang = 'golang';
+    const csharp = 'csharp';
+};
+
 class Base
 {
 
@@ -68,6 +83,38 @@ class Base
     static $sandbox_path = '/home/LTPPSANDBOX/';
 
     /**
+     * 语言转换
+     */
+    static $language_map = [
+        'csharp' => Language::csharp,
+        'c#' => Language::csharp,
+        'c++' => Language::cpp,
+        'cpp' => Language::cpp,
+        'java' => Language::java,
+        'c' => Language::c,
+        'javascript' => Language::javascript,
+        'js' => Language::javascript,
+        'node' => Language::javascript,
+        'typescript' => Language::typescript,
+        'ts' => Language::typescript,
+        'python' => Language::python,
+        'python2' => Language::python,
+        'python3' => Language::python,
+        'rusthon' => Language::python,
+        'rust' => Language::rust,
+        'golang' => Language::golang,
+        'go' => Language::golang,
+        'ruby' => Language::ruby,
+        'jruby' => Language::ruby,
+        'macruby' => Language::ruby,
+        'rake' => Language::ruby,
+        'rb' => Language::ruby,
+        'rbx' => Language::ruby,
+        'inc' => Language::php,
+        'php' => Language::php
+    ];
+
+    /**
      * 判题机用户代码运行状态码
      */
     static $judge_code_error = -1;
@@ -101,76 +148,6 @@ class Base
      * 测试用例路径
      */
     static $testdata_path = '/tmp/testdata/';
-
-    /**
-     * 可识别的语言
-     */
-
-    static $oj_judge_language = [
-        'C',
-        'C++',
-        'Java',
-        'Python3',
-        'Go',
-        'PHP',
-        'JavaScript',
-        'Rust',
-        'TypeScript',
-        'C#',
-        'Ruby'
-    ];
-
-    /**
-     * 语言转markdown可识别的语言
-     */
-
-    static $map_language_to_markdown = [
-        'C' => 'c',
-        'C++' => 'cpp',
-        'Java' => 'java',
-        'Python3' => 'python',
-        'Go' => 'go',
-        'PHP' => 'php',
-        'JavaScript' => 'javascript',
-        'Rust' => 'rust',
-        'TypeScript' => 'typescript',
-        'C#' => 'csharp',
-        'Ruby' => 'ruby'
-    ];
-
-    /**
-     * 代码文件后缀对应语言
-     */
-    static $map_language_file = [
-        'c' => 'c',
-        'h' => 'cpp',
-        'cc' => 'cpp',
-        'cpp' => 'cpp',
-        'java' => 'java',
-        'py' => 'python',
-        'go' => 'golang',
-        'php' => 'php',
-        'js' => 'javascript',
-        'rs' => 'rust',
-        'ts' => 'typescript',
-        'cs' => 'csharp',
-        'rb' => 'ruby',
-        'css' => 'css',
-        'sh' => 'bash',
-        'dll' => 'csharp',
-        'm' => 'objectivec',
-        'sql' => 'sql',
-        'vb' => 'vbnet',
-        'kt' => 'kotlin',
-        'json' => 'json',
-        'pas' => 'delphi',
-        'html' => 'html',
-        'yaml' => 'yaml',
-        'lock' => 'yaml',
-        'jsx' => 'javascript',
-        'vue' => 'javascript',
-        'tsx' => 'typescript'
-    ];
 
     /**
      * 代码输出内容长度限制
@@ -428,7 +405,7 @@ class Base
     static public function judgeCodeSafe($code, $userlanguage)
     {
         if (!$code) {
-            return ['code' => -1, 'data' => '请编写代码后再次提交哦！', 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => '请编写代码后再次提交哦！', 'memory' => 0, 'time' => 0];
         }
         switch ($userlanguage) {
             case 'C':
@@ -454,9 +431,9 @@ class Base
             case 'Ruby':
                 break;
             default:
-                return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'usememory' => 0, 'usetime' => 0];
+                return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0];
         }
-        return ['code' => 1, 'data' => Base::$code_safe, 'usememory' => 0, 'usetime' => 0];
+        return ['code' => 1, 'data' => Base::$code_safe, 'memory' => 0, 'time' => 0];
     }
 
     /**
@@ -589,57 +566,62 @@ class Base
         $out = [];
         try {
             //编译
+            $userlanguage = strtolower($userlanguage);
+            if (!isset(Base::$language_map[$userlanguage])) {
+                return ['code' => -1, 'data' => '请选择语言后提交！', 'memory' => 0, 'time' => 0];
+            }
+            $userlanguage = Base::$language_map[$userlanguage];
             switch ($userlanguage) {
-                case 'Java':
+                case Language::java:
                     $runcodefilepath = $filepath . 'Main';
                     Base::writeToFile($runcodefilepath . '.java', $code);
                     exec('/usr/bin/javac -J-Dfile.encoding=UTF-8 ' . $runcodefilepath . '.java 2>&1', $out);
                     break;
-                case 'C++':
+                case Language::cpp:
                     Base::writeToFile($runcodefilepath . '.cpp', $code);
                     exec('/usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.cpp -std=c++2a 2>&1', $out);
                     break;
-                case 'C':
+                case Language::c:
                     Base::writeToFile($runcodefilepath . '.c', $code);
                     exec('/usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.c -std=c++2a 2>&1', $out);
                     break;
-                case 'Go':
+                case Language::golang:
                     exec('/usr/bin/go env -w GO111MODULE=auto');
                     Base::writeToFile($runcodefilepath . '.go', $code);
                     exec('/usr/bin/go build -o ' . $filepath . ' ' . $runcodefilepath . '.go 2>&1', $out);
                     break;
-                case 'Rust':
+                case Language::rust:
                     Base::writeToFile($runcodefilepath . '.rs', $code);
                     exec('/root/.cargo/bin/rustc -O -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.rs 2>&1', $out);
                     break;
-                case 'C#':
+                case Language::csharp:
                     Base::writeToFile($runcodefilepath . '.cs', $code);
                     exec('/usr/bin/mcs -out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs 2>&1', $out);
                     break;
-                case 'TypeScript':
+                case Language::typescript:
                     Base::writeToFile($runcodefilepath . '.ts', $code);
                     exec('/usr/local/nodejs/bin/tsc -t es2022 --outFile ' . $runcodefilepath . '.js ' . $runcodefilepath . '.ts 2>&1', $out);
                     break;
-                case 'Python3':
+                case Language::python:
                     Base::writeToFile($runcodefilepath . '.py', $code);
                     break;
-                case 'PHP':
+                case Language::php:
                     Base::writeToFile($runcodefilepath . '.php', $code);
                     break;
-                case 'JavaScript':
+                case Language::javascript:
                     Base::writeToFile($runcodefilepath . '.js', $code);
                     break;
-                case 'Ruby':
+                case Language::ruby:
                     Base::writeToFile($runcodefilepath . '.rb', $code);
                     break;
                 default:
-                    return ['code' => -1, 'data' => '请选择语言后提交！', 'usememory' => 0, 'usetime' => 0];
+                    return ['code' => -1, 'data' => '请选择语言后提交！', 'memory' => 0, 'time' => 0];
             }
         } catch (Exception $e) {
             Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
-            return ['code' => -1, 'data' => '判题机异常！' . $e->getMessage(), 'usememory' => 0, 'usetime' => 0];
+            return ['code' => -1, 'data' => '判题机异常！' . $e->getMessage(), 'memory' => 0, 'time' => 0];
         }
-        return ['code' => 1, 'data' => $out, 'usememory' => 0, 'usetime' => 0];
+        return ['code' => 1, 'data' => $out, 'memory' => 0, 'time' => 0];
     }
 
     /**
@@ -656,37 +638,42 @@ class Base
     static public function run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory)
     {
         try {
+            $userlanguage = strtolower($userlanguage);
+            if (!isset(Base::$language_map[$userlanguage])) {
+                return [];
+            }
+            $userlanguage = Base::$language_map[$userlanguage];
             switch ($userlanguage) {
-                case 'Java':
+                case Language::java:
                     exec(Base::$judgepath . ' /usr/bin/java@-cp@' . $filepath . '@Main ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'Python3':
+                case Language::python:
                     exec(Base::$judgepath . ' /usr/bin/python3@' . $runcodefilepath . '.py ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'C++':
+                case Language::cpp:
                     exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'C':
+                case Language::c:
                     exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'Go':
+                case Language::golang:
                     exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'PHP':
+                case Language::php:
                     exec(Base::$judgepath . ' /usr/bin/php@' . $runcodefilepath . '.php ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'JavaScript':
+                case Language::javascript:
                     exec(Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'TypeScript':
+                case Language::typescript:
                     exec(Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'Ruby':
+                case Language::ruby:
                     exec(Base::$judgepath . ' /usr/bin/ruby@' . $runcodefilepath . '.rb ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                     break;
-                case 'C#':
+                case Language::csharp:
                     exec(Base::$judgepath . ' /usr/bin/mono@' . $runcodefilepath . ' ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
-                case 'Rust':
+                case Language::rust:
                     exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
                 default:
                     break;
