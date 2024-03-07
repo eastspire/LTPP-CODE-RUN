@@ -29,6 +29,7 @@ use Webman\Config;
 use Webman\Route;
 use Workerman\Protocols\Http\Session;
 use Workerman\Worker;
+use app\controller\Base;
 
 // Project base path
 define('BASE_PATH', dirname(__DIR__));
@@ -361,7 +362,7 @@ function locale(string $locale = null): string
  */
 function not_found(): Response
 {
-    return new Response(404, [], file_get_contents(public_path() . '/404.html'));
+    return Base::notFoundPage();
 }
 
 /**

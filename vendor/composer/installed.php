@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'ltpp/coderun',
-        'pretty_version' => 'dev-master',
-        'version' => 'dev-master',
-        'reference' => '3df23ea4c5b6ceea35121af7b56a51175dce88dd',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '6d71428dbd6eeade37a6b0e7479b7a57ba238140',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -119,9 +119,9 @@
             'dev_requirement' => false,
         ),
         'ltpp/coderun' => array(
-            'pretty_version' => 'dev-master',
-            'version' => 'dev-master',
-            'reference' => '3df23ea4c5b6ceea35121af7b56a51175dce88dd',
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '6d71428dbd6eeade37a6b0e7479b7a57ba238140',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -333,9 +333,9 @@
             'dev_requirement' => false,
         ),
         'webman/console' => array(
-            'pretty_version' => 'v1.2.24',
-            'version' => '1.2.24.0',
-            'reference' => 'ef81a310b0843ccc674be295ea9618bedbca460b',
+            'pretty_version' => 'v1.3.4',
+            'version' => '1.3.4.0',
+            'reference' => 'ee50a1eca292eea5bf70661aa2ef722e1294814c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../webman/console',
             'aliases' => array(),

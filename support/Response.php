@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This file is part of webman.
  *
@@ -20,5 +21,4 @@ namespace support;
  */
 class Response extends \Webman\Http\Response
 {
-
 }

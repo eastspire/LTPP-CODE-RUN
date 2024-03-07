@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "37f9ea7744686e5a0d928f80f7570911",
+    "content-hash": "9f7d26b1d997ce3d411c7161213bc034",
     "packages": [
         {
             "name": "carbonphp/carbon-doctrine-types",
@@ -2208,16 +2208,16 @@
         },
         {
             "name": "webman/console",
-            "version": "v1.2.24",
+            "version": "v1.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webman-php/console.git",
-                "reference": "ef81a310b0843ccc674be295ea9618bedbca460b"
+                "reference": "ee50a1eca292eea5bf70661aa2ef722e1294814c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webman-php/console/zipball/ef81a310b0843ccc674be295ea9618bedbca460b",
-                "reference": "ef81a310b0843ccc674be295ea9618bedbca460b",
+                "url": "https://api.github.com/repos/webman-php/console/zipball/ee50a1eca292eea5bf70661aa2ef722e1294814c",
+                "reference": "ee50a1eca292eea5bf70661aa2ef722e1294814c",
                 "shasum": ""
             },
             "require": {
@@ -2257,7 +2257,7 @@
                 "source": "https://github.com/webman-php/console",
                 "wiki": "http://www.workerman.net/doc/webman"
             },
-            "time": "2023-02-21T15:34:15+00:00"
+            "time": "2024-01-23T03:25:23+00:00"
         },
         {
             "name": "workerman/webman-framework",

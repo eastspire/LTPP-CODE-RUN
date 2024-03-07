@@ -7,6 +7,7 @@ namespace app\middleware;
 use Webman\MiddlewareInterface;
 use Webman\Http\Response;
 use Webman\Http\Request;
+use app\controller\Base;
 
 /**
  * 全局跨域请求处理
@@ -28,6 +29,10 @@ class CrossDomain implements MiddlewareInterface
             'Access-Control-Allow-Headers' => 'Authorization,Requestid,Key,Content-Type,If-Match,If-Modified-Since,If-None-Match,If-Unmodified-Since,X-CSRF-TOKEN,X-Requested-With',
             'Access-Control-Max-Age' => '88888888'
         ]);
+        $path = $request->path();
+        if ($path && $path != '/') {
+            return Base::notFoundPage($path);
+        }
         return $response;
     }
 }

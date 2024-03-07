@@ -10,7 +10,7 @@ class Base
     /**
      * 软件名称
      */
-    static $app_name = 'LTPP在线开发平台';
+    static $app_name = 'LTPP在线开发平台-CODE-RUN服务';
 
     /**
      * 代码提交成功提示
@@ -33,11 +33,6 @@ class Base
     static $default_http_header = ['Content-Type:application/x-www-form-urlencoded'];
 
     /**
-     * 服务器地址
-     */
-    static $GLOBlinuxurl = 'http://127.0.0.1:8787';
-
-    /**
      * ltpp用户id
      */
     static $ltpp_linux_user_id = 1000;
@@ -46,6 +41,11 @@ class Base
      * 文字编码
      */
     static $str_encoding = 'UTF-8,GBK,GB2312,BIG5';
+
+    /**
+     * 404
+     */
+    static $not_found = '';
 
     /**
      * 代码安全信息
@@ -208,51 +208,16 @@ class Base
     static $LTPP_public_path = '/home/LTPP/public';
 
     /**
-     * LTPP static文件夹路径
-     * @var string $LTPP_public_static_path LTPP static文件夹路径
-     */
-    static $LTPP_public_static_path = '/static';
-
-    /**
-     * 保存文件名长度限制
-     * @var string $file_name_length_limit 保存文件名长度限制
-     */
-    static $file_name_length_limit = 100;
-
-    /**
-     * 临时目录
-     */
-    static $tmp_path = '/tmp/';
-
-    /**
-     * 获取字符个数
-     * @param string $str
-     * @return int $length
-     */
-    static public function getStrLen($str = '')
-    {
-        try {
-            preg_match_all("/./u", $str, $matches);
-            $length = count($matches[0]);
-            return $length;
-        } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
-            return 0;
-        }
-    }
-
-    /**
      * 返回404页面
      */
     static public function notFoundPage($path = '', $file_extion = '')
     {
-        $not_found = '';
-        return response($not_found, 404, [
+        Base::$not_found = '';
+        return response(Base::$not_found, 200, [
             'Content-Type' => 'text/html;charset=utf-8',
             'Accept-Ranges' => 'bytes',
-            'Content-Length' => strlen($not_found),
+            'Content-Length' => strlen(Base::$not_found),
             'File-Content-Type' => 'text/html;charset=utf-8',
-            'Content-Encoding' => 'gzip',
             'File-Path' => $path,
             'File-Extion' => $file_extion,
         ]);
@@ -286,7 +251,6 @@ class Base
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-            curl_setopt($ch, CURLOPT_PROXY, 'http://172.17.0.1:7890');
             // 禁用 SSL 证书验证
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             // 禁用主机验证
@@ -321,7 +285,6 @@ class Base
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($ch, CURLOPT_PROXY, 'http://172.17.0.1:7890');
             // 禁用 SSL 证书验证
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             // 禁用主机验证
@@ -458,25 +421,6 @@ class Base
             return false;
         }
         return true;
-    }
-
-    /**
-     * 判断是否是Docker环境
-     */
-    static public function judgeIsDocker()
-    {
-        try {
-            $is_in_docker = file_exists('/.dockerenv') ||
-                (file_exists('/proc/1/cgroup') && is_file('/proc/1/cgroup') &&
-                    strpos(file_get_contents('/proc/1/cgroup'), 'docker') !== false);
-            if ($is_in_docker) {
-                return true;
-            }
-        } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
-            return false;
-        }
-        return false;
     }
 
     /**
@@ -799,7 +743,7 @@ class Base
     }
 
     /**
-     * 获取用户代码状态，消耗的时间和内存
+     * 用户代码状态，消耗的时间和内存
      * @param string $str
      * @return array $res
      */
