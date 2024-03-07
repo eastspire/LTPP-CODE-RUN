@@ -16,7 +16,7 @@ class Index
         $userlanguage = $request->post('language');
         $userlanguage = strtolower($userlanguage);
         if (!isset(Base::$language_map[$userlanguage])) {
-            return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0];
+            return json(['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0]);
         }
         $userlanguage = Base::$language_map[$userlanguage];
         //代码检测
@@ -25,9 +25,10 @@ class Index
             return json($check_safe_json);
         }
         if (!Base::judgeJudgeInstall()) {
-            return ['code' => -1, 'data' => '判题机未安装', 'usememory' => 0, 'usetime' => 0];
+            return json(['code' => -1, 'data' => '判题机未安装', 'usememory' => 0, 'usetime' => 0]);
         }
-        return $this->run($code, $userlanguage, $testin);
+        $run_res =  $this->run($code, $userlanguage, $testin);
+        return json($run_res);
     }
 
     /**
