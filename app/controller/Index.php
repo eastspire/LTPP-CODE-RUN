@@ -14,6 +14,11 @@ class Index
         $code = $request->post('code');
         $testin = $request->post('testin');
         $userlanguage = $request->post('language');
+        $userlanguage = strtolower($userlanguage);
+        if (!isset(Base::$language_map[$userlanguage])) {
+            return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0];
+        }
+        $userlanguage = Base::$language_map[$userlanguage];
         //代码检测
         $check_safe_json = Base::judgeCodeSafe($code, $userlanguage);
         if (!isset($check_safe_json['code']) || $check_safe_json['code'] != 1) {
@@ -32,7 +37,7 @@ class Index
      * @param string $testin
      * @return array $json
      */
-    static private function run($code = '', $userlanguage = 'C++', $testin = '')
+    static private function run($code = '', $userlanguage = Language::cpp, $testin = '')
     {
         $limittime = 4000;
         $limitmemory = 1073741824;

@@ -408,27 +408,27 @@ class Base
             return ['code' => -1, 'data' => '请编写代码后再次提交哦！', 'memory' => 0, 'time' => 0];
         }
         switch ($userlanguage) {
-            case 'C':
+            case Language::c:
                 break;
-            case 'C++':
+            case Language::cpp:
                 break;
-            case 'Java':
+            case Language::java:
                 break;
-            case 'Python3':
+            case Language::python:
                 break;
-            case 'Go':
+            case Language::golang:
                 break;
-            case 'PHP':
+            case Language::php:
                 break;
-            case 'JavaScript':
+            case Language::javascript:
                 break;
-            case 'Rust':
+            case Language::rust:
                 break;
-            case 'TypeScript':
+            case Language::typescript:
                 break;
-            case 'C#':
+            case Language::csharp:
                 break;
-            case 'Ruby':
+            case Language::ruby:
                 break;
             default:
                 return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0];
@@ -566,11 +566,6 @@ class Base
         $out = [];
         try {
             //编译
-            $userlanguage = strtolower($userlanguage);
-            if (!isset(Base::$language_map[$userlanguage])) {
-                return ['code' => -1, 'data' => '请选择语言后提交！', 'memory' => 0, 'time' => 0];
-            }
-            $userlanguage = Base::$language_map[$userlanguage];
             switch ($userlanguage) {
                 case Language::java:
                     $runcodefilepath = $filepath . 'Main';
@@ -638,11 +633,6 @@ class Base
     static public function run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory)
     {
         try {
-            $userlanguage = strtolower($userlanguage);
-            if (!isset(Base::$language_map[$userlanguage])) {
-                return [];
-            }
-            $userlanguage = Base::$language_map[$userlanguage];
             switch ($userlanguage) {
                 case Language::java:
                     exec(Base::$judgepath . ' /usr/bin/java@-cp@' . $filepath . '@Main ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
