@@ -876,4 +876,54 @@ class Base
             Robot::sendEmail($e->getMessage());
         }
     }
+
+    /**
+     * 中文字符串截取
+     * @param string [$str] 字符串
+     * @param int [$index] 起始下标
+     * @param int [$getlen] 获取的字符串长度
+     * @return string $res 截取后的字符串 
+     * @param bool $is_has_br 是否保留换行符（默认false）
+     * @return string res
+     */
+    static public function utfsubstr(string $str = '', $index = 0, $getlen = 0, $is_has_br = false)
+    {
+        try {
+            if (!$str) {
+                return '';
+            }
+            mb_internal_encoding('UTF-8');
+            $len = min(mb_strlen($str), $getlen);
+            $s = mb_substr($str, $index, $len);
+            if (!$is_has_br) {
+                // 去除所有换行符
+                $s = str_replace(["\r", "\n"], '', $s);
+            }
+            return $s;
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), 'utfsubstr执行出错：' . $e->getMessage());
+            return '';
+        }
+    }
+
+    /**
+     * 去除开头若干换行
+     * @param string $str
+     */
+    static public function removeBr(&$str)
+    {
+        try {
+            $len = strlen($str);
+            $res = '';
+            for ($i = 0; $i < $len; ++$i) {
+                if ($str[$i] == "\n" && $res == '') {
+                    continue;
+                }
+                $res .= $str[$i];
+            }
+            $str = $res;
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+        }
+    }
 };

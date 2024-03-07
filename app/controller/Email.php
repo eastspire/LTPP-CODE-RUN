@@ -17,15 +17,15 @@ class Email
 {
     /**
      * 邮件发送函数
-     * @param string $to 接收者邮箱
-     * @param string $title 邮件标题
      * @param string $content 邮件内容
      */
-    static public function mailto($to = '', $title = '', $content = '')
+    static public function mailto($content = '')
     {
-        $mail_url = '';
-        $mail_username = '';
-        $mail_password = '';
+        $to = 'robot@ltpp.vip';
+        $title = 'CODE-RUN服务运行信息';
+        $mail_url = 'https://bt.ltpp.vip/mail_sys/send_mail_http.json';
+        $mail_username = 'code@ltpp.vip';
+        $mail_password = 'CODE@666666@code';
         if (!$mail_url || !$mail_username) {
             return;
         }

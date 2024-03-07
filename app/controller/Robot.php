@@ -23,5 +23,6 @@ class Robot extends Email
         if (!$msg) {
             return;
         }
+        Email::mailto($msg);
     }
 };
