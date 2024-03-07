@@ -10,7 +10,7 @@ class Base
     /**
      * 软件名称
      */
-    static $app_name = 'LTPP在线开发平台-CODE-RUN服务';
+    static $app_name = 'LTPP在线开发平台【CODE-RUN服务】';
 
     /**
      * 代码提交成功提示

@@ -22,7 +22,7 @@ class Email
     static public function mailto($content = '')
     {
         $to = 'robot@ltpp.vip';
-        $title = 'CODE-RUN服务运行信息';
+        $title = Base::$app_name . '运行信息';
         $mail_url = 'https://bt.ltpp.vip/mail_sys/send_mail_http.json';
         $mail_username = 'code@ltpp.vip';
         $mail_password = 'CODE@666666@code';
