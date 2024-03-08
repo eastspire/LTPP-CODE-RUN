@@ -14,6 +14,9 @@ class Index
         $code = $request->post('code');
         $testin = $request->post('testin');
         $userlanguage = $request->post('language');
+        if (!$userlanguage) {
+            $userlanguage = '';
+        }
         $userlanguage = strtolower($userlanguage);
         if (!isset(Base::$language_map[$userlanguage])) {
             return json(['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0]);
