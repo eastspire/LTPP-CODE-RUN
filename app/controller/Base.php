@@ -581,7 +581,7 @@ class Base
     {
         $out = [];
         try {
-            $timeout_time = ceil($limittime / 1000);
+            $timeout_time = ceil($limittime / 1000) << 2;
             $run_exec_code = 0;
             //编译
             switch ($userlanguage) {
