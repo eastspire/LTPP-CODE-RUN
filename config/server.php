@@ -4,7 +4,7 @@
  * @Date: 2023-04-07 19:48:54
  * @LastEditors: wmzn-ltpp 1491579574@qq.com
  * @LastEditTime: 2023-12-02 23:42:40
- * @FilePath: \LTPP-CODE\config\server.php
+ * @FilePath: \LTPP-CODE-RUN\config\server.php
  * @Description: Email:1491579574@qq.com
  * QQ:1491579574
  * Copyright (c) 2023 by ${git_name_email}, All Rights Reserved. 
