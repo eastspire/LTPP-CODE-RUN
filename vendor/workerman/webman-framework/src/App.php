@@ -153,7 +153,6 @@ class App
             $controllerAndAction = static::parseControllerAction($path);
             $plugin = $controllerAndAction['plugin'] ?? static::getPluginByPath($path);
             if (!$controllerAndAction || Route::hasDisableDefaultRoute($plugin)) {
-                $request->plugin = $plugin;
                 $callback = static::getFallback($plugin);
                 $request->app = $request->controller = $request->action = '';
                 static::send($connection, $callback($request), $request);
@@ -287,7 +286,7 @@ class App
         $args = $args === null ? null : array_values($args);
         $middlewares = [];
         if ($route) {
-            $routeMiddlewares = $route->getMiddleware();
+            $routeMiddlewares = array_reverse($route->getMiddleware());
             foreach ($routeMiddlewares as $className) {
                 $middlewares[] = [$className, 'process'];
             }
@@ -416,10 +415,11 @@ class App
             }
         }
         if (!$firstParameter->hasType()) {
-            return count($args) > count($reflectionParameters);
-        }
-
-        if (!is_a(static::$requestClass, $firstParameter->getType()->getName())) {
+            if (count($args) <= count($reflectionParameters)) {
+                return false;
+            }
+            return true;
+        } elseif (!is_a(static::$requestClass, $firstParameter->getType()->getName())) {
             return true;
         }
 
@@ -536,13 +536,13 @@ class App
      */
     protected static function findRoute(TcpConnection $connection, string $path, string $key, $request): bool
     {
-        $routeInfo = Route::dispatch($request->method(), $path);
-        if ($routeInfo[0] === Dispatcher::FOUND) {
-            $routeInfo[0] = 'route';
-            $callback = $routeInfo[1]['callback'];
-            $route = clone $routeInfo[1]['route'];
+        $ret = Route::dispatch($request->method(), $path);
+        if ($ret[0] === Dispatcher::FOUND) {
+            $ret[0] = 'route';
+            $callback = $ret[1]['callback'];
+            $route = clone $ret[1]['route'];
             $app = $controller = $action = '';
-            $args = !empty($routeInfo[2]) ? $routeInfo[2] : null;
+            $args = !empty($ret[2]) ? $ret[2] : null;
             if ($args) {
                 $route->setParams($args);
             }
@@ -655,10 +655,6 @@ class App
     protected static function parseControllerAction(string $path)
     {
         $path = str_replace('-', '', $path);
-        static $cache = [];
-        if (isset($cache[$path])) {
-            return $cache[$path];
-        }
         $pathExplode = explode('/', trim($path, '/'));
         $isPlugin = isset($pathExplode[1]) && $pathExplode[0] === 'app';
         $configPrefix = $isPlugin ? "plugin.$pathExplode[1]." : '';
@@ -669,21 +665,15 @@ class App
         $pathExplode = $relativePath ? explode('/', $relativePath) : [];
 
         $action = 'index';
-        if (!$controllerAction = static::guessControllerAction($pathExplode, $action, $suffix, $classPrefix)) {
-            if (count($pathExplode) <= 1) {
-                return false;
-            }
-            $action = end($pathExplode);
-            unset($pathExplode[count($pathExplode) - 1]);
-            $controllerAction = static::guessControllerAction($pathExplode, $action, $suffix, $classPrefix);
+        if ($controllerAction = static::guessControllerAction($pathExplode, $action, $suffix, $classPrefix)) {
+            return $controllerAction;
         }
-        if ($controllerAction && !isset($path[256])) {
-            $cache[$path] = $controllerAction;
-            if (count($cache) > 1024) {
-                unset($cache[key($cache)]);
-            }
+        if (count($pathExplode) <= 1) {
+            return false;
         }
-        return $controllerAction;
+        $action = end($pathExplode);
+        unset($pathExplode[count($pathExplode) - 1]);
+        return static::guessControllerAction($pathExplode, $action, $suffix, $classPrefix);
     }
 
     /**
@@ -915,7 +905,7 @@ class App
 
 
     /**
-     * @param mixed $data
+     * @param $data
      * @return string
      */
     protected static function stringify($data): string

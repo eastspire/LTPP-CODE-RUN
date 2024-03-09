@@ -100,7 +100,7 @@ class Route
         if ($middleware === null) {
             return $this->middlewares;
         }
-        $this->middlewares = array_merge($this->middlewares, is_array($middleware) ? array_reverse($middleware) : [$middleware]);
+        $this->middlewares = array_merge($this->middlewares, is_array($middleware) ? $middleware : [$middleware]);
         return $this;
     }
 
@@ -124,9 +124,9 @@ class Route
 
     /**
      * GetCallback.
-     * @return callable|null
+     * @return callable
      */
-    public function getCallback()
+    public function getCallback(): ?callable
     {
         return $this->callback;
     }

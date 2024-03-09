@@ -100,7 +100,7 @@ class $name extends Command
      * @param OutputInterface \$output
      * @return int
      */
-    protected function execute(InputInterface \$input, OutputInterface \$output): int
+    protected function execute(InputInterface \$input, OutputInterface \$output)
     {
         \$name = \$input->getArgument('name');
         \$output->writeln('Hello $command');

@@ -53,18 +53,20 @@ class Twig implements View
      * @param string $template
      * @param array $vars
      * @param string|null $app
-     * @param string|null $plugin
      * @return string
+     * @throws LoaderError
+     * @throws RuntimeError
+     * @throws SyntaxError
      */
-    public static function render(string $template, array $vars, string $app = null, string $plugin = null): string
+    public static function render(string $template, array $vars, string $app = null): string
     {
         static $views = [];
         $request = request();
-        $plugin = $plugin === null ? ($request->plugin ?? '') : $plugin;
+        $plugin = $request->plugin ?? '';
         $app = $app === null ? $request->app : $app;
         $configPrefix = $plugin ? "plugin.$plugin." : '';
         $viewSuffix = config("{$configPrefix}view.options.view_suffix", 'html');
-        $key = "$plugin-$app";
+        $key = "$plugin-$request->app";
         if (!isset($views[$key])) {
             $baseViewPath = $plugin ? base_path() . "/plugin/$plugin/app" : app_path();
             $viewPath = $app === '' ? "$baseViewPath/view/" : "$baseViewPath/$app/view/";

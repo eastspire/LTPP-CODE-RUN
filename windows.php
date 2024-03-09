@@ -61,7 +61,6 @@ function write_process_file($runtimeProcessPath, $processName, $firm): string
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Workerman\Worker;
-use Workerman\Connection\TcpConnection;
 use Webman\Config;
 use support\App;
 
@@ -78,7 +77,6 @@ worker_start('$processParam', $configParam);
 
 if (DIRECTORY_SEPARATOR != "/") {
     Worker::\$logFile = config('server')['log_file'] ?? Worker::\$logFile;
-    TcpConnection::\$defaultMaxPackageSize = config('server')['max_package_size'] ?? 10*1024*1024;
 }
 
 Worker::runAll();
@@ -95,9 +93,9 @@ if ($monitorConfig = config('process.monitor.constructor')) {
 
 function popen_processes($processFiles)
 {
-    $cmd = '"' . PHP_BINARY . '" ' . implode(' ', $processFiles);
+    $cmd = "php " . implode(' ', $processFiles);
     $descriptorspec = [STDIN, STDOUT, STDOUT];
-    $resource = proc_open($cmd, $descriptorspec, $pipes, null, null, ['bypass_shell' => true]);
+    $resource = proc_open($cmd, $descriptorspec, $pipes);
     if (!$resource) {
         exit("Can not execute $cmd\r\n");
     }

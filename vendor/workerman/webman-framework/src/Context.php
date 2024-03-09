@@ -15,11 +15,11 @@
 
 namespace Webman;
 
+use ArrayObject;
 use Fiber;
 use SplObjectStorage;
 use StdClass;
 use Swow\Coroutine;
-use WeakMap;
 use Workerman\Events\Revolt;
 use Workerman\Events\Swoole;
 use Workerman\Events\Swow;
@@ -34,7 +34,7 @@ class Context
 {
 
     /**
-     * @var SplObjectStorage|WeakMap
+     * @var SplObjectStorage;
      */
     protected static $objectStorage;
 
@@ -49,20 +49,23 @@ class Context
     protected static function getObject(): StdClass
     {
         if (!static::$objectStorage) {
-            static::$objectStorage = class_exists(WeakMap::class) ? new WeakMap() : new SplObjectStorage();
+            static::$objectStorage = new SplObjectStorage();
             static::$object = new StdClass;
         }
-        $key = static::getKey();
-        if (!isset(static::$objectStorage[$key])) {
-            static::$objectStorage[$key] = new StdClass;
+        $coroutine = static::getCoroutine();
+        if (!$coroutine) {
+            return static::$object;
         }
-        return static::$objectStorage[$key];
+        if (!isset(static::$objectStorage[$coroutine])) {
+            static::$objectStorage[$coroutine] = new StdClass;
+        }
+        return static::$objectStorage[$coroutine];
     }
 
     /**
-     * @return mixed
+     * @return ArrayObject|Fiber|Coroutine|null
      */
-    protected static function getKey()
+    protected static function getCoroutine()
     {
         switch (Worker::$eventLoopClass) {
             case Revolt::class:
@@ -72,7 +75,7 @@ class Context
             case Swow::class:
                 return Coroutine::getCurrent();
         }
-        return static::$object;
+        return null;
     }
 
     /**
@@ -93,7 +96,7 @@ class Context
      * @param $value
      * @return void
      */
-    public static function set(string $key, $value): void
+    public static function set(string $key, $value)
     {
         $obj = static::getObject();
         $obj->$key = $value;
@@ -103,7 +106,7 @@ class Context
      * @param string $key
      * @return void
      */
-    public static function delete(string $key): void
+    public static function delete(string $key)
     {
         $obj = static::getObject();
         unset($obj->$key);
@@ -122,8 +125,12 @@ class Context
     /**
      * @return void
      */
-    public static function destroy(): void
+    public static function destroy()
     {
-        unset(static::$objectStorage[static::getKey()]);
+        static::$object = new StdClass;
+        $coroutine = static::getCoroutine();
+        if ($coroutine) {
+            unset(static::$objectStorage[$coroutine]);
+        }
     }
 }
