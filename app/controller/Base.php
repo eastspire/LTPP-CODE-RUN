@@ -38,9 +38,24 @@ class Base
     static $code_up_fail_msg = '代码提交失败！请重新提交！';
 
     /**
+     * 异常超时提示
+     */
+    static $timout_error_msg = '系统检测到异常代码导致运行超时！请修改代码后重新运行！';
+
+    /**
      * 判题机路径
      */
     static $judgepath = '/JudgeServer/judge';
+
+    /**
+     * 时间限制（MS）
+     */
+    static $code_run_limittime = 4000;
+
+    /**
+     * 内存限制（KB）
+     */
+    static $code_run_limitmemory = 1073741824;
 
     /**
      * 默认请求头
@@ -561,40 +576,42 @@ class Base
      * @param string $runcodefilepath
      * @return array $res
      */
-    static public function compiler($userlanguage, $code, $filepath, $runcodefilepath)
+    static public function compiler($userlanguage, $code, $filepath, $runcodefilepath, $limittime)
     {
         $out = [];
+        $timeout_time = ceil($limittime / 1000);
+        $run_exec_code = 0;
         try {
             //编译
             switch ($userlanguage) {
                 case Language::rust:
                     Base::writeToFile($runcodefilepath . '.rs', $code);
-                    exec('/root/.cargo/bin/rustc -O -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.rs 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /root/.cargo/bin/rustc -O -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.rs 2>&1', $out, $run_exec_code);
                     break;
                 case Language::c:
                     Base::writeToFile($runcodefilepath . '.c', $code);
-                    exec('/usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.c -std=c++2a 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.c -std=c++2a 2>&1', $out, $run_exec_code);
                     break;
                 case Language::cpp:
                     Base::writeToFile($runcodefilepath . '.cpp', $code);
-                    exec('/usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.cpp -std=c++2a 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.cpp -std=c++2a 2>&1', $out, $run_exec_code);
                     break;
                 case Language::golang:
-                    exec('/usr/bin/go env -w GO111MODULE=auto');
+                    exec('timeout ' . $timeout_time . ' /usr/bin/go env -w GO111MODULE=auto');
                     Base::writeToFile($runcodefilepath . '.go', $code);
-                    exec('/usr/bin/go build -o ' . $filepath . ' ' . $runcodefilepath . '.go 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /usr/bin/go build -o ' . $filepath . ' ' . $runcodefilepath . '.go 2>&1', $out, $run_exec_code);
                     break;
                 case Language::java:
                     $runcodefilepath = $filepath . 'Main';
                     Base::writeToFile($runcodefilepath . '.java', $code);
-                    exec('/usr/bin/javac -J-Dfile.encoding=UTF-8 ' . $runcodefilepath . '.java 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /usr/bin/javac -J-Dfile.encoding=UTF-8 ' . $runcodefilepath . '.java 2>&1', $out, $run_exec_code);
                     break;
                 case Language::javascript:
                     Base::writeToFile($runcodefilepath . '.js', $code);
                     break;
                 case Language::typescript:
                     Base::writeToFile($runcodefilepath . '.ts', $code);
-                    exec('/usr/local/nodejs/bin/tsc -t es2022 --outFile ' . $runcodefilepath . '.js ' . $runcodefilepath . '.ts 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /usr/local/nodejs/bin/tsc -t es2022 --outFile ' . $runcodefilepath . '.js ' . $runcodefilepath . '.ts 2>&1', $out, $run_exec_code);
                     break;
                 case Language::php:
                     Base::writeToFile($runcodefilepath . '.php', $code);
@@ -607,10 +624,13 @@ class Base
                     break;
                 case Language::csharp:
                     Base::writeToFile($runcodefilepath . '.cs', $code);
-                    exec('/usr/bin/mcs -out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' /usr/bin/mcs -out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs 2>&1', $out, $run_exec_code);
                     break;
                 default:
                     return ['code' => -1, 'data' => '请选择语言后提交！', 'memory' => 0, 'time' => 0];
+            }
+            if (Base::judgeIsTimeout($run_exec_code)) {
+                return ['code' => -1, 'data' => Base::$timout_error_msg, 'memory' => 0, 'time' => 0];
             }
         } catch (Exception $e) {
             Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
@@ -633,46 +653,70 @@ class Base
     static public function run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory)
     {
         try {
+            $out = [];
+            $timeout_time = ceil($limittime / 1000);
+            $run_exec_code = 0;
             switch ($userlanguage) {
                 case Language::rust:
-                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                 case Language::c:
-                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::cpp:
-                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::golang:
-                    exec(Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::java:
-                    exec(Base::$judgepath . ' /usr/bin/java@-cp@' . $filepath . '@Main ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/java@-cp@' . $filepath . '@Main ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::javascript:
-                    exec(Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::typescript:
-                    exec(Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::php:
-                    exec(Base::$judgepath . ' /usr/bin/php@' . $runcodefilepath . '.php ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/php@' . $runcodefilepath . '.php ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::python:
-                    exec(Base::$judgepath . ' /usr/bin/python3@' . $runcodefilepath . '.py ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/python3@' . $runcodefilepath . '.py ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::ruby:
-                    exec(Base::$judgepath . ' /usr/bin/ruby@' . $runcodefilepath . '.rb ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/ruby@' . $runcodefilepath . '.rb ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                     break;
                 case Language::csharp:
-                    exec(Base::$judgepath . ' /usr/bin/mono@' . $runcodefilepath . ' ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out);
+                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/mono@' . $runcodefilepath . ' ' . $limittime * 2 . ' ' . $limitmemory * 2 . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
                 default:
                     break;
+            }
+            if (Base::judgeIsTimeout($run_exec_code)) {
+                return [json_encode([
+                    'status' => 0,
+                    'time_used' => 0,
+                    'memory_used' => 0,
+                    'msg' => Base::$timout_error_msg
+                ])];
             }
         } catch (Exception $e) {
             Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             return $out;
         }
         return $out;
+    }
+
+    /**
+     * 判断是否超时
+     */
+    static public function judgeIsTimeout($run_exec_code)
+    {
+        try {
+            return $run_exec_code == 124;
+        } catch (Exception $e) {
+            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
+            return false;
+        }
     }
 
     /**

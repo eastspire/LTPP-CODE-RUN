@@ -43,8 +43,6 @@ class Index
      */
     static private function run($code = '', $userlanguage = Language::cpp, $testin = '')
     {
-        $limittime = 4000;
-        $limitmemory = 1073741824;
         $md5aid = md5(time());
         $mainfile = '';
         //用户文件夹
@@ -71,7 +69,7 @@ class Index
         Base::writeToFile($errpath, '');
 
         //编译
-        $compiler_res_json = Base::compiler($userlanguage, $code, $filepath, $runcodefilepath);
+        $compiler_res_json = Base::compiler($userlanguage, $code, $filepath, $runcodefilepath, Base::$code_run_limittime);
 
         if (!isset($compiler_res_json['code']) || $compiler_res_json['code'] != 1) {
             return $compiler_res_json;
@@ -100,7 +98,7 @@ class Index
         $out = [];
 
         //运行
-        $out = Base::run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory);
+        $out = Base::run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, Base::$code_run_limittime, Base::$code_run_limitmemory);
 
         if (!$out || empty($out)) {
             return ['code' => -1, 'data' => '判题机运行异常！', 'memory' => 0, 'time' => 0];
