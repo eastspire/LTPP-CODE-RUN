@@ -30,7 +30,18 @@ class CrossDomain implements MiddlewareInterface
             'Access-Control-Max-Age' => '88888888'
         ]);
         $path = $request->path();
-        if ($path && $path != '/') {
+        $header = $request->header();
+        if (!$header) {
+            $header = [];
+        }
+        $referer = '';
+        if (isset($header['referer']) && $header['referer']) {
+            $referer = $header['referer'];
+        }
+        if (isset($header['Referer']) && $header['Referer']) {
+            $referer = $header['Referer'];
+        }
+        if (!$referer || ($path && $path != '/')) {
             return Base::notFoundPage($path);
         }
         return $response;

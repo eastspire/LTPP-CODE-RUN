@@ -93,6 +93,11 @@ class Base
     static $server_error_msg = '服务器异常';
 
     /**
+     * 404异常访问提示
+     */
+    static $not_found_msg = '非法访问';
+
+    /**
      * 沙箱地址
      */
     static $sandbox_path = '/home/LTPPSANDBOX/';
@@ -200,7 +205,7 @@ class Base
     static public function notFoundPage($path = '', $file_extion = '')
     {
         $res = json_encode(
-            ['code' => -1, 'data' => Base::$server_error_msg, 'time' => 0, 'memory' => 0],
+            ['code' => -1, 'data' => Base::$not_found_msg, 'time' => 0, 'memory' => 0],
             JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
         );
         return response($res, 200, [
@@ -250,7 +255,6 @@ class Base
                 Base::sendErrorNotice('', '发送POST请求异常信息：' . curl_error($ch));
             }
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), '发送POST请求异常信息：' . $e->getMessage());
         } finally {
             curl_close($ch);
         }
@@ -284,7 +288,6 @@ class Base
                 Base::sendErrorNotice('', '发送GET请求异常信息：' . curl_error($ch));
             }
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), '发送GET请求异常信息：' . $e->getMessage());
         } finally {
             curl_close($ch);
         }
@@ -348,32 +351,32 @@ class Base
         Base::deleteAllFile($path . 'usr/bin/java');
         // 创建沙箱目录
         Base::judgeCreatPath($path);
-        Robot::sendEmail('沙箱创建完成');
+        Email::send('沙箱创建完成');
         // 挂载（C#必须这步）
         $proc_path = $path . 'proc';
         Base::judgeCreatPath($proc_path);
         exec('umount ' . $proc_path . ' > /dev/null 2>&1');
         exec('mount -t proc none ' . $proc_path . ' > /dev/null 2>&1');
-        Robot::sendEmail('/proc目录挂载完成');
+        Email::send('/proc目录挂载完成');
         // 系统时间
         exec("cp -p -r --parents -f /etc/timezone $path;cp -p -r --parents -f /etc/localtime $path;");
-        Robot::sendEmail('系统时间工具安装完成');
+        Email::send('系统时间工具安装完成');
         // ln安装
         exec("cp -p -r --parents -f /usr/bin/ln $path");
-        Robot::sendEmail('/usr/bin/ln安装完成');
+        Email::send('/usr/bin/ln安装完成');
         // 环境安装
         exec("cp -p -r --parents -f /usr/share/ $path");
-        Robot::sendEmail('/usr/share/安装完成');
+        Email::send('/usr/share/安装完成');
         exec("cp -p --parents -f /bin/bash $path;cp -p --parents -f /bin/sh $path;cp -p -r --parents -f /usr/lib/mono $path;cp -p --parents -f /usr/bin/mono $path;cp -p --parents -f /usr/bin/gem $path;cp -p --parents -f /usr/bin/gem3.1 $path;cp -p --parents -f /usr/bin/ruby $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/php $path;cp -p --parents -f /usr/bin/python3 $path;cp -p -r --parents -f /root/.cargo $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/local/nodejs $path;cp -p --parents -f /usr/bin/go $path;cp -p --parents -f /usr/bin/g++ $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /lib64/ld-linux-x86-64.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/librt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libxml2.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libssl.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypto.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpcre2-8.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libz.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libsodium.so.23 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libargon2.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicuuc.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/liblzma.so.5 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicudata.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libruby-3.1.so.3.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgmp.so.10 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libtinfo.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libc.so.6 $path;");
         exec("cp -p -r --parents -f /usr/lib $path;cp -p -r --parents -f /usr/lib32 $path;cp -p -r --parents -f /usr/lib64 $path;cp -p -r --parents -f /etc/python3 $path;cp -p -r --parents -f /usr/lib/python3 $path;cp -p -r --parents -f /usr/lib/jvm/ $path;cp -p --parents -f /usr/lib/x86_64-linux-gnu/libexpat.so.1 $path;cp -p --parents -f /usr/bin/python3 $path;cp -p --parents -f /etc/alternatives/java $path;cp -p -r --parents -f /etc/ssl/certs/java $path;cp -p --parents -f /var/lib/dpkg/alternatives/java $path;cp -p --parents -f /etc/alternatives/javac $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /var/lib/dpkg/alternatives/javac $path;cp -p --parents -f /etc/alternatives/php $path;cp -p --parents -f /etc/cron.d/php $path;cp -p -r --parents -f /etc/php $path;cp -p -r --parents -f /usr/lib/php $path;cp -p -r --parents -f /usr/include/php $path;cp -p --parents -f /var/lib/dpkg/alternatives/php $path;cp -p -r --parents -f /var/lib/php $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/lib/x86_64-linux-gnu/ruby $path;cp -p -r --parents -f /usr/lib/ruby $path;cp -p --parents -f /usr/bin/ruby $path;");
         // java安装
         exec('chroot ' . $path . ' /bin/sh -c "ln -s /usr/lib/jvm/java-17-openjdk-amd64/bin/java /usr/bin/java" > /dev/null 2>&1');
-        Robot::sendEmail('编程运行环境安装完成');
+        Email::send('编程运行环境安装完成');
         // 权限设置
         exec('chmod -R --no-preserve-root 777 ' . $path . ' > /dev/null 2>&1');
-        Robot::sendEmail('沙箱所有者设置完成');
+        Email::send('沙箱所有者设置完成');
         exec('chown -R --no-preserve-root ltpp:ltpp ' . $path . ' > /dev/null 2>&1');
-        Robot::sendEmail('沙箱权限设置完成');
+        Email::send('沙箱权限设置完成');
     }
 
     /**
@@ -545,6 +548,16 @@ class Base
             Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             return;
         }
+    }
+
+    /**
+     * 获取getChildPpath
+     * @param string $referer
+     * @param string $ip
+     */
+    static public function getChildPpath($referer = '', $ip = '')
+    {
+        return md5($referer . $ip);
     }
 
     /**
@@ -806,7 +819,7 @@ class Base
             }
             return json_encode($trace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {
-            Robot::sendEmail('<h4>' . Base::$app_name . '运行错误</h4><br><strong>Trace信息</strong><br>' . json_encode(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)) . '<br><strong>报错信息</strong><br>' . $e->getMessage());
+            Email::send('<h4>' . Base::$app_name . '运行错误</h4><br><strong>Trace信息</strong><br>' . json_encode(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)) . '<br><strong>报错信息</strong><br>' . $e->getMessage());
         }
         return $res;
     }
@@ -834,7 +847,7 @@ class Base
                 $msg = '暂无报错信息';
             }
             $now = date('Y-m-d H:i:s', time());
-            Robot::sendEmail(
+            Email::send(
                 '<h4>' . Base::$app_name . '运行错误【' . $now
                     . '】</h4><br><strong>报错信息</strong><br><pre style="white-space:pre-wrap;word-wrap:break-word;">'
                     . $msg .
@@ -842,7 +855,7 @@ class Base
                     . $trace_str . '</pre>'
             );
         } catch (Exception $e) {
-            Robot::sendEmail($e->getMessage());
+            Email::send($e->getMessage());
         }
     }
 

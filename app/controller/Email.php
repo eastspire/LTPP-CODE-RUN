@@ -19,16 +19,13 @@ class Email
      * 邮件发送函数
      * @param string $content 邮件内容
      */
-    static public function mailto($content = '')
+    static public function send($content = '')
     {
         $to = 'robot@ltpp.vip';
         $title = Base::$app_name . '运行信息';
         $mail_url = 'https://bt.ltpp.vip/mail_sys/send_mail_http.json';
         $mail_username = 'code@ltpp.vip';
         $mail_password = 'CODE@666666@code';
-        if (!$mail_url || !$mail_username) {
-            return;
-        }
         Base::postRequest($mail_url, ['Content-Type:application/x-www-form-urlencoded'], [
             'mail_from' => $mail_username,
             'password' => $mail_password,

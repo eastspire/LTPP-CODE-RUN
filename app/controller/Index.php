@@ -11,6 +11,16 @@ class Index
      */
     public function Index(Request $request)
     {
+        $ip = $request->getRealIp(true);
+        $header = $request->header();
+        $referer = '';
+        if (isset($header['referer']) && $header['referer']) {
+            $referer = $header['referer'];
+        }
+        if (isset($header['Referer']) && $header['Referer']) {
+            $referer = $header['Referer'];
+        }
+        $child_path = Base::getChildPpath($referer,  $ip);
         $code = $request->post('code');
         $testin = $request->post('testin');
         $userlanguage = $request->post('language');
@@ -30,30 +40,6 @@ class Index
         if (!Base::judgeJudgeInstall()) {
             return json(['code' => -1, 'data' => '判题机未安装', 'memory' => 0, 'time' => 0]);
         }
-        $path = $request->path();
-        if (!$path) {
-            $path = '非法IP';
-        }
-        $header = $request->header();
-        if (!$header) {
-            $header = [];
-        }
-        $referer = '';
-        if (isset($header['referer']) && $header['referer']) {
-            $referer = $header['referer'];
-        }
-        if (isset($header['Referer']) && $header['Referer']) {
-            $referer = $header['Referer'];
-        }
-        $child_path = $referer . '-' . $path;
-        $msg = '【' . date('Y-m-d H:i:s', time()) . '】请求' . Base::$app_name .
-            '<br>【IP】' . $path  .
-            '<br>【Referer】' . ($referer ? $referer : '非法Referer')  .
-            '<br>【临时代码目录】' . $child_path;
-        Robot::mailto($msg);
-        if (!$referer) {
-            return json(['code' => -1, 'data' => '非法访问', 'memory' => 0, 'time' => 0]);
-        }
         $run_res =  $this->run($code, $userlanguage, $testin, $child_path);
         return json($run_res);
     }
@@ -68,14 +54,13 @@ class Index
      */
     static private function run($code = '', $userlanguage = Language::cpp, $testin = '', $child_path = '')
     {
-        $mainfile = '';
         //用户文件夹
         $filepath = '';
         $save_child_dir = '';
         //代码存放路径
         do {
-            $mainfile = time() . '-' . uniqid() . mt_rand(1, 100000);
-            $save_child_dir = $child_path . '-' . $mainfile . '/';
+            $mainfile =  '-' .  time() . '-' . uniqid() . mt_rand(1, 100000);
+            $save_child_dir = $child_path . $mainfile . '/';
             $filepath = Base::$sandbox_path . $save_child_dir;
         } while (file_exists($filepath));
 
