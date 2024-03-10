@@ -68,7 +68,6 @@ class Index
      */
     static private function run($code = '', $userlanguage = Language::cpp, $testin = '', $child_path = '')
     {
-        $md5aid = $child_path;
         $mainfile = '';
         //用户文件夹
         $filepath = '';
@@ -76,7 +75,7 @@ class Index
         //代码存放路径
         do {
             $mainfile = time() . '-' . uniqid() . mt_rand(1, 100000);
-            $save_child_dir = $md5aid . '-' . $mainfile . '/';
+            $save_child_dir = $child_path . '-' . $mainfile . '/';
             $filepath = Base::$sandbox_path . $save_child_dir;
         } while (file_exists($filepath));
 
