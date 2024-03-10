@@ -30,7 +30,31 @@ class Index
         if (!Base::judgeJudgeInstall()) {
             return json(['code' => -1, 'data' => '判题机未安装', 'memory' => 0, 'time' => 0]);
         }
-        $run_res =  $this->run($code, $userlanguage, $testin);
+        $path = $request->path();
+        if (!$path) {
+            $path = '非法IP';
+        }
+        $header = $request->header();
+        if (!$header) {
+            $header = [];
+        }
+        $referer = '';
+        if (isset($header['referer']) && $header['referer']) {
+            $referer = $header['referer'];
+        }
+        if (isset($header['Referer']) && $header['Referer']) {
+            $referer = $header['Referer'];
+        }
+        $child_path = $referer . '-' . $path;
+        $msg = '【' . date('Y-m-d H:i:s', time()) . '】请求' . Base::$app_name .
+            '<br>【IP】' . $path  .
+            '<br>【Referer】' . ($referer ? $referer : '非法Referer')  .
+            '<br>【临时代码目录】' . $child_path;
+        Robot::mailto($msg);
+        if (!$referer) {
+            return json(['code' => -1, 'data' => '非法访问', 'memory' => 0, 'time' => 0]);
+        }
+        $run_res =  $this->run($code, $userlanguage, $testin, $child_path);
         return json($run_res);
     }
 
@@ -39,18 +63,21 @@ class Index
      * @param string $code
      * @param string $userlanguage
      * @param string $testin
+     * @param string $child_path
      * @return array $json
      */
-    static private function run($code = '', $userlanguage = Language::cpp, $testin = '')
+    static private function run($code = '', $userlanguage = Language::cpp, $testin = '', $child_path = '')
     {
-        $md5aid = md5(time());
+        $md5aid = $child_path;
         $mainfile = '';
         //用户文件夹
         $filepath = '';
+        $save_child_dir = '';
         //代码存放路径
         do {
-            $mainfile = uniqid() . mt_rand(1, 100000) . time();
-            $filepath = Base::$sandbox_path . $md5aid . '/' . $mainfile . '/';
+            $mainfile = time() . '-' . uniqid() . mt_rand(1, 100000);
+            $save_child_dir = $md5aid . '-' . $mainfile . '/';
+            $filepath = Base::$sandbox_path . $save_child_dir;
         } while (file_exists($filepath));
 
         if (!file_exists($filepath)) {
@@ -85,10 +112,8 @@ class Index
             foreach ($out as &$tem) {
                 $err_data .= $tem . "\n";
             }
-            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $md5aid . '/' . $mainfile . '/';
-            $err_data = str_replace($tp, '', $err_data);
-            $tp = $md5aid . '/' . $mainfile . '/';
-            $err_data = str_replace($tp, '', $err_data);
+            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $save_child_dir;
+            $err_data = str_replace([$tp, $save_child_dir], '', $err_data);
             Base::removeBr($err_data);
             $code .= $err_data;
             $res_data .= $err_data;
@@ -125,10 +150,8 @@ class Index
             $resout = Base::getFileText($errpath);
             Base::deleteAllFile($filepath);
             // 去除路径信息
-            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $md5aid . '/' . $mainfile . '/';
-            $resout = str_replace($tp, '', $resout);
-            $tp = $md5aid . '/' . $mainfile . '/';
-            $resout = str_replace($tp, '', $resout);
+            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $save_child_dir;
+            $resout = str_replace([$tp, $save_child_dir], '', $resout);
             Base::removeBr($resout);
 
             if (strlen($resout) > Base::$code_out_limit) {
@@ -147,10 +170,8 @@ class Index
         //读取输出
         $resout = Base::getFileText($outpath);
         // 去除路径信息
-        $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $md5aid . '/' . $mainfile . '/';
-        $resout = str_replace($tp, '', $resout);
-        $tp = $md5aid . '/' . $mainfile . '/';
-        $resout = str_replace($tp, '', $resout);
+        $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $save_child_dir;
+        $resout = str_replace([$tp, $save_child_dir], '', $resout);
         Base::removeBr($resout);
 
         if (strlen($resout) > Base::$code_out_limit) {
