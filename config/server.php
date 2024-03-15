@@ -27,7 +27,7 @@ return [
     'listen' => 'http://0.0.0.0:8787',
     'transport' => 'tcp',
     'context' => [],
-    'name' => 'LTPP',
+    'name' => 'LTPP-CODE-RUN',
     'count' => (cpu_count() > 6 ? 6 : cpu_count()) * 2,
     'user' => '',
     'group' => '',
