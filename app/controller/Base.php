@@ -219,82 +219,6 @@ class Base
     }
 
     /**
-     * 发送POST请求
-     * @param string $url 请求地址
-     * @param array $header 请求头
-     * @param array $body 请求体
-     * @param bool $body_type_is_json 请求体是否是json
-     * @return string $res 响应数据
-     */
-    static function postRequest($url = '', $header = [], $body = [], $body_type_is_json = false)
-    {
-        if (!$url) {
-            return '';
-        }
-        $res = '';
-        try {
-            if ($body_type_is_json) {
-                $data_string = json_encode($body);
-            } else {
-                $data_string = http_build_query($body);
-            }
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
-            curl_setopt($ch, CURLOPT_ENCODING, 'UTF-8');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-            // 禁用 SSL 证书验证
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            // 禁用主机验证
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            $res = curl_exec($ch);
-            if (curl_errno($ch)) {
-                Base::sendErrorNotice('', '发送POST请求异常信息：' . curl_error($ch));
-            }
-        } catch (Exception $e) {
-        } finally {
-            curl_close($ch);
-        }
-        return $res;
-    }
-
-    /**
-     * 发送GET请求
-     */
-    static function getRequest($url = '', $header = [])
-    {
-        if (!$url) {
-            return '';
-        }
-        $res = '';
-        try {
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HTTPGET, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 3600);
-            curl_setopt($ch, CURLOPT_ENCODING, 'UTF-8');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            // 禁用 SSL 证书验证
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            // 禁用主机验证
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-            $res = curl_exec($ch);
-            if (curl_errno($ch)) {
-                Base::sendErrorNotice('', '发送GET请求异常信息：' . curl_error($ch));
-            }
-        } catch (Exception $e) {
-        } finally {
-            curl_close($ch);
-        }
-        return $res;
-    }
-
-    /**
      * 判断路径是否存在（路径以/开头），不存在创建路径中的文件夹
      * @param string $path 路径
      * @param int $grade 权限
@@ -351,32 +275,24 @@ class Base
         Base::deleteAllFile($path . 'usr/bin/java');
         // 创建沙箱目录
         Base::judgeCreatPath($path);
-        Email::send('沙箱创建完成');
         // 挂载（C#必须这步）
         $proc_path = $path . 'proc';
         Base::judgeCreatPath($proc_path);
         exec('umount ' . $proc_path . ' > /dev/null 2>&1');
         exec('mount -t proc none ' . $proc_path . ' > /dev/null 2>&1');
-        Email::send('/proc目录挂载完成');
         // 系统时间
         exec("cp -p -r --parents -f /etc/timezone $path;cp -p -r --parents -f /etc/localtime $path;");
-        Email::send('系统时间工具安装完成');
         // ln安装
         exec("cp -p -r --parents -f /usr/bin/ln $path");
-        Email::send('/usr/bin/ln安装完成');
         // 环境安装
         exec("cp -p -r --parents -f /usr/share/ $path");
-        Email::send('/usr/share/安装完成');
         exec("cp -p --parents -f /bin/bash $path;cp -p --parents -f /bin/sh $path;cp -p -r --parents -f /usr/lib/mono $path;cp -p --parents -f /usr/bin/mono $path;cp -p --parents -f /usr/bin/gem $path;cp -p --parents -f /usr/bin/gem3.1 $path;cp -p --parents -f /usr/bin/ruby $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/php $path;cp -p --parents -f /usr/bin/python3 $path;cp -p -r --parents -f /root/.cargo $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/local/nodejs $path;cp -p --parents -f /usr/bin/go $path;cp -p --parents -f /usr/bin/g++ $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /lib64/ld-linux-x86-64.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/librt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libxml2.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libssl.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypto.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpcre2-8.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libz.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libsodium.so.23 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libargon2.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicuuc.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/liblzma.so.5 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicudata.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libruby-3.1.so.3.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgmp.so.10 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libtinfo.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libc.so.6 $path;");
         exec("cp -p -r --parents -f /usr/lib $path;cp -p -r --parents -f /usr/lib32 $path;cp -p -r --parents -f /usr/lib64 $path;cp -p -r --parents -f /etc/python3 $path;cp -p -r --parents -f /usr/lib/python3 $path;cp -p -r --parents -f /usr/lib/jvm/ $path;cp -p --parents -f /usr/lib/x86_64-linux-gnu/libexpat.so.1 $path;cp -p --parents -f /usr/bin/python3 $path;cp -p --parents -f /etc/alternatives/java $path;cp -p -r --parents -f /etc/ssl/certs/java $path;cp -p --parents -f /var/lib/dpkg/alternatives/java $path;cp -p --parents -f /etc/alternatives/javac $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /var/lib/dpkg/alternatives/javac $path;cp -p --parents -f /etc/alternatives/php $path;cp -p --parents -f /etc/cron.d/php $path;cp -p -r --parents -f /etc/php $path;cp -p -r --parents -f /usr/lib/php $path;cp -p -r --parents -f /usr/include/php $path;cp -p --parents -f /var/lib/dpkg/alternatives/php $path;cp -p -r --parents -f /var/lib/php $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/lib/x86_64-linux-gnu/ruby $path;cp -p -r --parents -f /usr/lib/ruby $path;cp -p --parents -f /usr/bin/ruby $path;");
         // java安装
         exec('chroot ' . $path . ' /bin/sh -c "ln -s /usr/lib/jvm/java-17-openjdk-amd64/bin/java /usr/bin/java" > /dev/null 2>&1');
-        Email::send('编程运行环境安装完成');
         // 权限设置
         exec('chmod -R --no-preserve-root 777 ' . $path . ' > /dev/null 2>&1');
-        Email::send('沙箱所有者设置完成');
         exec('chown -R --no-preserve-root ltpp:ltpp ' . $path . ' > /dev/null 2>&1');
-        Email::send('沙箱权限设置完成');
     }
 
     /**
@@ -410,7 +326,6 @@ class Base
             closedir($handle);
             @rmdir($dir);
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), 'deleteAllFile执行出错：' . $e->getMessage());
             return false;
         }
         return true;
@@ -476,11 +391,10 @@ class Base
                 foreach ($out as $tem) {
                     $res .= $tem . "\n";
                 }
-                Base::sendErrorNotice(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT), '判题机安装出错：' . $res);
                 return false;
             }
+            Base::installSandboxEnv();
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), '判题机安装出错：' . $e->getMessage());
             return false;
         }
         return true;
@@ -513,7 +427,6 @@ class Base
                 Base::chmodFile($tempath, $num);
             }
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             return;
         }
     }
@@ -545,7 +458,6 @@ class Base
                 Base::chownFile($tempath, $user_id);
             }
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             return;
         }
     }
@@ -647,8 +559,7 @@ class Base
                 return ['code' => -1, 'data' => Base::$timout_error_msg, 'memory' => 0, 'time' => 0];
             }
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
-            return ['code' => -1, 'data' => '判题机异常！' . $e->getMessage(), 'memory' => 0, 'time' => 0];
+            return ['code' => -1, 'data' => Base::$server_error_msg, 'memory' => 0, 'time' => 0];
         }
         return ['code' => 1, 'data' => $out, 'memory' => 0, 'time' => 0];
     }
@@ -714,12 +625,11 @@ class Base
                 ])];
             }
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             return [json_encode([
                 'status' => 0,
                 'time_used' => 0,
                 'memory_used' => 0,
-                'msg' => $e->getMessage()
+                'msg' => Base::$server_error_msg
             ])];
         }
         return $out;
@@ -733,7 +643,6 @@ class Base
         try {
             return $run_exec_code == 124;
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             return false;
         }
     }
@@ -763,9 +672,8 @@ class Base
             $text = mb_convert_encoding($text, 'UTF-8', $encoding);
             return $text;
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
-            return '';
         }
+        return '';
     }
 
     /**
@@ -798,65 +706,11 @@ class Base
             $memory_used = (int) $res['memory_used'];
             $msg = $res['msg'];
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
             // 触发错误的情况是判题机输出 Segmentation fault (core dumped) 导致解析json失败 而判题机触发该错误是不断分配内存不回收触发安全机制导致程序崩溃
             // 由于具体分配内存大小不确定，所以按照 RE 处理
             return ['status' => 4, 'time_used' => $time_used, 'memory_used' => $memory_used, 'msg' => $msg];
         }
         return ['status' => $status, 'time_used' => $time_used, 'memory_used' => $memory_used, 'msg' => $msg];
-    }
-
-    /**
-     * DEBUG
-     * @param * $trace trace
-     */
-    static public function debugTrace(&$trace = false)
-    {
-        $res = '';
-        try {
-            if ($trace === false) {
-                return '';
-            }
-            return json_encode($trace, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        } catch (Exception $e) {
-            Email::send('<h4>' . Base::$app_name . '运行错误</h4><br><strong>Trace信息</strong><br>' . json_encode(debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT)) . '<br><strong>报错信息</strong><br>' . $e->getMessage());
-        }
-        return $res;
-    }
-
-    /**
-     * 发送错误通知
-     */
-    static public function sendErrorNotice($trace = false, $msg = '')
-    {
-        try {
-            if ($trace === false) {
-                return;
-            }
-            $trace_str = $trace;
-            if (is_array($trace) || is_object($trace)) {
-                $trace_str = Base::debugTrace($trace);
-            }
-            if (is_array($msg) || is_object($msg)) {
-                $msg = Base::debugTrace($msg);
-            }
-            if (!$trace_str) {
-                $trace_str = '暂无Trace信息';
-            }
-            if (!$msg) {
-                $msg = '暂无报错信息';
-            }
-            $now = date('Y-m-d H:i:s', time());
-            Email::send(
-                '<h4>' . Base::$app_name . '运行错误【' . $now
-                    . '】</h4><br><strong>报错信息</strong><br><pre style="white-space:pre-wrap;word-wrap:break-word;">'
-                    . $msg .
-                    '</pre><br><strong>Trace信息</strong><br><pre style="white-space:pre-wrap;word-wrap:break-word;">'
-                    . $trace_str . '</pre>'
-            );
-        } catch (Exception $e) {
-            Email::send($e->getMessage());
-        }
     }
 
     /**
@@ -883,7 +737,6 @@ class Base
             }
             return $s;
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), 'utfsubstr执行出错：' . $e->getMessage());
             return '';
         }
     }
@@ -905,7 +758,6 @@ class Base
             }
             $str = $res;
         } catch (Exception $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
         }
     }
 };

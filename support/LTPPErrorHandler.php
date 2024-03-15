@@ -22,11 +22,8 @@ class LTPPErrorHandler extends ExceptionHandler
     public function report(Throwable $exception)
     {
         try {
-            // 通知
-            Base::sendErrorNotice($exception->getTraceAsString(), '系统未捕获的异常：' . $exception->getMessage());
             parent::report($exception);
         } catch (Throwable $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), '系统未捕获的异常：' . $e->getMessage());
         }
     }
 
@@ -36,28 +33,21 @@ class LTPPErrorHandler extends ExceptionHandler
             if (($exception instanceof BusinessException) && ($response = $exception->render($request))) {
                 return $response;
             }
-            if ($request->expectsJson()) {
-                $json = [
-                    'code' => -1,
-                    'data' => Base::$server_error_msg,
-                    'time' => 0,
-                    'memory' => 0
-                ];
-                $this->debug && $json['traces'] = (string)$exception;
-                return new Response(
-                    200,
-                    ['Content-Type' => 'application/json'],
-                    json_encode(
-                        $json,
-                        JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
-                    )
-                );
-            }
-            if ($this->debug) {
-                return new Response(200, [], nl2br((string)$exception));
-            }
+            $json = [
+                'code' => -1,
+                'data' => Base::$server_error_msg,
+                'time' => 0,
+                'memory' => 0
+            ];
+            return new Response(
+                200,
+                ['Content-Type' => 'application/json'],
+                json_encode(
+                    $json,
+                    JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+                )
+            );
         } catch (Throwable $e) {
-            Base::sendErrorNotice($e->getTraceAsString(), $e->getMessage());
         }
         return Base::notFoundPage();
     }
