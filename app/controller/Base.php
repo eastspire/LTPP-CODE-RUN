@@ -618,7 +618,7 @@ class Base
             }
             if (Base::judgeIsTimeout($run_exec_code)) {
                 return [json_encode([
-                    'status' => 0,
+                    'status' => Base::$judge_server_error,
                     'time_used' => 0,
                     'memory_used' => 0,
                     'msg' => Base::$timout_error_msg
@@ -626,7 +626,7 @@ class Base
             }
         } catch (Exception $e) {
             return [json_encode([
-                'status' => 0,
+                'status' => Base::$judge_server_error,
                 'time_used' => 0,
                 'memory_used' => 0,
                 'msg' => Base::$server_error_msg
@@ -759,5 +759,57 @@ class Base
             $str = $res;
         } catch (Exception $e) {
         }
+    }
+
+    /**
+     * 代码运行创建目录和代码
+     * @param string $user_path
+     * @param string $testin 
+     */
+    static public function creatCodeRunDirFile($user_path = '', $testin = '')
+    {
+        // 子目录名称
+        $mainfile = '';
+        // 完整路径
+        $filepath = '';
+        // 可执行文件完整路径
+        $runcodefilepath = '';
+        // 输入文件完整路径
+        $inpath = '';
+        // 输出文件完整路径
+        $outpath = '';
+        // 错误文件完整路径
+        $errpath = '';
+        try {
+            //代码存放路径
+            do {
+                $mainfile = $user_path . uniqid() . mt_rand(1, 100000) . time() . '/';
+                $filepath = Base::$sandbox_path .  $mainfile;
+            } while (file_exists($filepath));
+            if (!file_exists($filepath)) {
+                Base::judgeCreatPath($filepath, 0777);
+            }
+            // 可执行文件不能提前生成或写入
+            // 如果提前生成或写入会导致编译器生成可执行文件失败
+            $runcodefilepath = $filepath . 'main';
+            //输入文件
+            $inpath = $runcodefilepath . '.in';
+            Base::writeToFile($inpath, $testin);
+            //输出文件
+            $outpath = $runcodefilepath . '.out';
+            Base::writeToFile($outpath, '');
+            //错误文件
+            $errpath = $runcodefilepath . '.err';
+            Base::writeToFile($errpath, '');
+        } catch (Exception $e) {
+        }
+        return [
+            'mainfile' => $mainfile,
+            'filepath' => $filepath,
+            'runcodefilepath' => $runcodefilepath,
+            'inpath' => $inpath,
+            'outpath' => $outpath,
+            'errpath' => $errpath,
+        ];
     }
 };

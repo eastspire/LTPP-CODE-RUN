@@ -55,34 +55,19 @@ class Index
     static private function run($code = '', $userlanguage = Language::cpp, $testin = '', $child_path = '')
     {
         //用户文件夹
-        $filepath = '';
-        $save_child_dir = '';
-        //代码存放路径
-        do {
-            $mainfile =  '-' .  time() . '-' . uniqid() . mt_rand(1, 100000);
-            $save_child_dir = $child_path . $mainfile . '/';
-            $filepath = Base::$sandbox_path . $save_child_dir;
-        } while (file_exists($filepath));
-
-        if (!file_exists($filepath)) {
-            Base::judgeCreatPath($filepath, 0777);
-        }
-
-        $runcodefilepath = $filepath . 'main';
-        //输入文件
-        $inpath = $runcodefilepath . '.in';
-        Base::writeToFile($inpath, $testin);
-        //输出文件
-        $outpath = $runcodefilepath . '.out';
-        Base::writeToFile($outpath, '');
-        //错误文件
-        $errpath = $runcodefilepath . '.err';
-        Base::writeToFile($errpath, '');
+        $dir_res = Base::creatCodeRunDirFile($child_path, $testin);
+        $mainfile = $dir_res['mainfile'];
+        $filepath = $dir_res['filepath'];
+        $runcodefilepath = $dir_res['runcodefilepath'];
+        $inpath = $dir_res['inpath'];
+        $outpath = $dir_res['outpath'];
+        $errpath = $dir_res['errpath'];
 
         //编译
         $compiler_res_json = Base::compiler($userlanguage, $code, $filepath, $runcodefilepath, Base::$code_run_limittime);
 
         if (!isset($compiler_res_json['code']) || $compiler_res_json['code'] != 1) {
+            Base::deleteAllFile($filepath);
             return $compiler_res_json;
         }
 
@@ -96,8 +81,8 @@ class Index
             foreach ($out as &$tem) {
                 $err_data .= $tem . "\n";
             }
-            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $save_child_dir;
-            $err_data = str_replace([$tp, $save_child_dir], '', $err_data);
+            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $mainfile;
+            $err_data = str_replace([$tp, $mainfile], '', $err_data);
             Base::removeBr($err_data);
             $code .= $err_data;
             $res_data .= $err_data;
@@ -110,11 +95,13 @@ class Index
         $out = Base::run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, Base::$code_run_limittime, Base::$code_run_limitmemory);
 
         if (!$out || empty($out)) {
+            Base::deleteAllFile($filepath);
             return ['code' => -1, 'data' => '判题机运行异常！', 'memory' => 0, 'time' => 0];
         }
         $out = $out[0];
         $run_resource_consumption = Base::getCodeTimeMemory($out);
         if (!$run_resource_consumption || !isset($run_resource_consumption['status'])) {
+            Base::deleteAllFile($filepath);
             return ['code' => -1, 'data' => '判题机运行异常！', 'memory' => 0, 'time' => 0];
         }
 
@@ -123,6 +110,7 @@ class Index
         $memory_used = $run_resource_consumption['memory_used'] ?? 0;
 
         if ($status == Base::$judge_server_error) {
+            Base::deleteAllFile($filepath);
             $msg = $run_resource_consumption['msg'];
             return ['code' => -1, 'data' => '判题机运行异常！' . "\n" . $msg, 'memory' => 0, 'time' => 0];
         }
@@ -134,8 +122,8 @@ class Index
             $resout = Base::getFileText($errpath);
             Base::deleteAllFile($filepath);
             // 去除路径信息
-            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $save_child_dir;
-            $resout = str_replace([$tp, $save_child_dir], '', $resout);
+            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $mainfile;
+            $resout = str_replace([$tp, $mainfile], '', $resout);
             Base::removeBr($resout);
 
             if (strlen($resout) > Base::$code_out_limit) {
@@ -154,8 +142,8 @@ class Index
         //读取输出
         $resout = Base::getFileText($outpath);
         // 去除路径信息
-        $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $save_child_dir;
-        $resout = str_replace([$tp, $save_child_dir], '', $resout);
+        $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $mainfile;
+        $resout = str_replace([$tp, $mainfile], '', $resout);
         Base::removeBr($resout);
 
         if (strlen($resout) > Base::$code_out_limit) {
