@@ -86,6 +86,9 @@ class Index
             Base::removeBr($err_data);
             $code .= $err_data;
             $res_data .= $err_data;
+            if (strlen($res_data) > Base::$code_out_limit) {
+                $res_data = Base::utfsubstr($res_data, 0, Base::$code_out_limit, true) . "\n" . '【仅显示前' . Base::$code_out_limit . '个字符】';
+            }
             return ['code' => -1, 'data' => $res_data, 'memory' => 0, 'time' => 0];
         }
 
@@ -112,6 +115,9 @@ class Index
         if ($status == Base::$judge_server_error) {
             Base::deleteAllFile($filepath);
             $msg = $run_resource_consumption['msg'];
+            if (strlen($msg) > Base::$code_out_limit) {
+                $resout = Base::utfsubstr($msg, 0, Base::$code_out_limit, true) . "\n" . '【仅显示前' . Base::$code_out_limit . '个字符】';
+            }
             return ['code' => -1, 'data' => Base::$code_run_error . "！\n" . $msg, 'memory' => 0, 'time' => 0];
         }
 
@@ -127,7 +133,7 @@ class Index
             Base::removeBr($resout);
 
             if (strlen($resout) > Base::$code_out_limit) {
-                $resout = Base::utfsubstr($resout, 0, Base::$code_out_limit, true) . "\n" . '（仅显示前' . Base::$code_out_limit . '个字符）';
+                $resout = Base::utfsubstr($resout, 0, Base::$code_out_limit, true) . "\n" . '【仅显示前' . Base::$code_out_limit . '个字符】';
             }
             $code .= $resout . "\n";
             $err_data .= $resout;
@@ -147,7 +153,7 @@ class Index
         Base::removeBr($resout);
 
         if (strlen($resout) > Base::$code_out_limit) {
-            $resout = Base::utfsubstr($resout, 0, Base::$code_out_limit, true) . "\n" . '（仅显示前' . Base::$code_out_limit . '个字符）';
+            $resout = Base::utfsubstr($resout, 0, Base::$code_out_limit, true) . "\n" . '【仅显示前' . Base::$code_out_limit . '个字符】';
         }
         switch ($status) {
             case Base::$judge_code_tle:
