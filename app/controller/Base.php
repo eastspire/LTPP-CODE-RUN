@@ -596,7 +596,12 @@ class Base
                     ];
             }
             if (Base::judgeIsTimeout($run_exec_code)) {
-                return ['code' => -1, 'data' => Base::$timout_error_msg, 'memory' => 0, 'time' => 0];
+                return [
+                    'code' => -1,
+                    'data' => Base::$timout_error_msg,
+                    'memory' => 0,
+                    'time' => $timeout_time * 1000,
+                ];
             }
         } catch (Exception $e) {
             return [
@@ -669,7 +674,7 @@ class Base
             if (Base::judgeIsTimeout($run_exec_code)) {
                 return [json_encode([
                     'status' => Base::$judge_server_error,
-                    'time_used' => 0,
+                    'time_used' => $timeout_time * 1000,
                     'memory_used' => 0,
                     'msg' => Base::$timout_error_msg
                 ])];
