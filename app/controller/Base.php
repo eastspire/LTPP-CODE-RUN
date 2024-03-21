@@ -206,9 +206,9 @@ class Base
 
     /**
      * 代码输出内容长度限制
-     * @var int $code_out_limit 文章内容长度限制
+     * @var int $code_out_limit 代码输出内容长度限制
      */
-    static $code_out_limit = 10000;
+    static $code_out_limit = 100000;
 
     /**
      * LTPP文件夹绝对路径
