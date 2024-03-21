@@ -75,7 +75,7 @@ class Index
         if (!empty($out)) {
             Base::deleteAllFile($filepath);
             $code = $code . "\n\n\n报错详情：\n";
-            $res_data = '编译出错！' . "\n";
+            $res_data = Base::$code_run_compiler_wrong . "！\n";
             $err_data = '';
             // 去除路径信息
             foreach ($out as &$tem) {
@@ -96,13 +96,13 @@ class Index
 
         if (!$out || empty($out)) {
             Base::deleteAllFile($filepath);
-            return ['code' => -1, 'data' => '判题机运行异常！', 'memory' => 0, 'time' => 0];
+            return ['code' => -1, 'data' => Base::$code_run_error . '！', 'memory' => 0, 'time' => 0];
         }
         $out = $out[0];
         $run_resource_consumption = Base::getCodeTimeMemory($out);
         if (!$run_resource_consumption || !isset($run_resource_consumption['status'])) {
             Base::deleteAllFile($filepath);
-            return ['code' => -1, 'data' => '判题机运行异常！', 'memory' => 0, 'time' => 0];
+            return ['code' => -1, 'data' => Base::$code_run_error . '！', 'memory' => 0, 'time' => 0];
         }
 
         $status = $run_resource_consumption['status'] ?? 0;
@@ -112,12 +112,12 @@ class Index
         if ($status == Base::$judge_server_error) {
             Base::deleteAllFile($filepath);
             $msg = $run_resource_consumption['msg'];
-            return ['code' => -1, 'data' => '判题机运行异常！' . "\n" . $msg, 'memory' => 0, 'time' => 0];
+            return ['code' => -1, 'data' => Base::$code_run_error . "！\n" . $msg, 'memory' => 0, 'time' => 0];
         }
 
         if ($status == Base::$judge_code_error) {
             $code .= "\n\n\n报错详情：\n";
-            $err_data = '运行出错' . "\n";
+            $err_data = Base::$code_run_running_wrong . "！\n";
             //读取输出
             $resout = Base::getFileText($errpath);
             Base::deleteAllFile($filepath);
@@ -152,13 +152,13 @@ class Index
         switch ($status) {
             case Base::$judge_code_tle:
                 Base::deleteAllFile($filepath);
-                return ['code' => -1, 'data' => 'TLE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'time' => $time_used, 'memory' => $memory_used];
+                return ['code' => -1, 'data' => Base::$code_run_tle . '！请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'time' => $time_used, 'memory' => $memory_used];
             case Base::$judge_code_mle:
                 Base::deleteAllFile($filepath);
-                return ['code' => -1, 'data' => 'MLE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'time' => $time_used, 'memory' => $memory_used];
+                return ['code' => -1, 'data' =>  Base::$code_run_mle . '！请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'time' => $time_used, 'memory' => $memory_used];
             case Base::$judge_code_re:
                 Base::deleteAllFile($filepath);
-                return ['code' => -1, 'data' => 'RE！' . '请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'time' => $time_used, 'memory' => $memory_used];
+                return ['code' => -1, 'data' =>  Base::$code_run_re . '！请更改代码后再次尝试哦！' . ($resout ? "\n" . $resout : ''), 'time' => $time_used, 'memory' => $memory_used];
             default:
                 break;
         }

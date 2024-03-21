@@ -165,6 +165,41 @@ class Base
     static $judge_code_re = 4;
 
     /**
+     * 代码TLE关键词
+     */
+    static $code_run_tle = 'TLE';
+
+    /**
+     * 代码RE关键词
+     */
+    static $code_run_re = 'RE';
+
+    /**
+     * 代码MLE关键词
+     */
+    static $code_run_mle = 'MLE';
+
+    /**
+     * 代码编译出错关键词
+     */
+    static $code_run_compiler_wrong = '编译出错';
+
+    /**
+     * 代码运行出错关键词
+     */
+    static $code_run_running_wrong = '运行出错';
+
+    /**
+     * 判题机编译异常提示
+     */
+    static $code_compiler_error = '判题机编译异常';
+
+    /**
+     * 判题机运行异常提示
+     */
+    static $code_run_error = '判题机运行异常';
+
+    /**
      * 测试用例路径
      */
     static $testdata_path = '/tmp/testdata/';
