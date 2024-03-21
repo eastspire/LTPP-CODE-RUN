@@ -588,15 +588,30 @@ class Base
                     exec('timeout ' . $timeout_time . ' /usr/bin/mcs -out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs 2>&1', $out, $run_exec_code);
                     break;
                 default:
-                    return ['code' => -1, 'data' => '请选择语言后提交！', 'memory' => 0, 'time' => 0];
+                    return [
+                        'code' => -1,
+                        'data' => '请选择语言后提交！',
+                        'memory' => 0,
+                        'time' => 0
+                    ];
             }
             if (Base::judgeIsTimeout($run_exec_code)) {
                 return ['code' => -1, 'data' => Base::$timout_error_msg, 'memory' => 0, 'time' => 0];
             }
         } catch (Exception $e) {
-            return ['code' => -1, 'data' => Base::$server_error_msg, 'memory' => 0, 'time' => 0];
+            return [
+                'code' => -1,
+                'data' => Base::$server_error_msg,
+                'memory' => 0,
+                'time' => 0
+            ];
         }
-        return ['code' => 1, 'data' => $out, 'memory' => 0, 'time' => 0];
+        return [
+            'code' => 1,
+            'data' => $out,
+            'memory' => 0,
+            'time' => 0
+        ];
     }
 
     /**
