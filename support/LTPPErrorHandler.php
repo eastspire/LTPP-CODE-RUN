@@ -21,10 +21,6 @@ class LTPPErrorHandler extends ExceptionHandler
 
     public function report(Throwable $exception)
     {
-        try {
-            parent::report($exception);
-        } catch (Throwable $e) {
-        }
     }
 
     public function render(Request $request, Throwable $exception): Response
