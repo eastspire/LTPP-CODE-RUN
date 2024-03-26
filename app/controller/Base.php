@@ -241,7 +241,7 @@ class Base
     {
         $res = json_encode(
             ['code' => -1, 'data' => Base::$not_found_msg, 'time' => 0, 'memory' => 0],
-            JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
         );
         return response($res, 200, [
             'Content-Type' => 'application/json;charset=utf-8',
