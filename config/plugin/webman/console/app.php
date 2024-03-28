@@ -2,6 +2,12 @@
 
 return [
     'enable' => true,
+    'custom_ini' => '
+        memory_limit=-1
+        upload_max_filesize=1024G
+        post_max_size=1024G
+        max_execution_time=0
+    ',
     'phar_file_output_dir' => BASE_PATH . DIRECTORY_SEPARATOR . 'build',
     'phar_filename' => 'LTPP-CODE-RUN.phar',
     'bin_filename' => 'LTPP-CODE-RUN',

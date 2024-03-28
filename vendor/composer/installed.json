@@ -168,8 +168,8 @@
         },
         {
             "name": "illuminate/bus",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/bus.git",
@@ -224,17 +224,17 @@
         },
         {
             "name": "illuminate/collections",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
-                "reference": "7bc2e907285b6a38acb3b386dcc577b185bf3d73"
+                "reference": "f9589f1063a449111dcaa1d68285b507d9483a95"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/collections/zipball/7bc2e907285b6a38acb3b386dcc577b185bf3d73",
-                "reference": "7bc2e907285b6a38acb3b386dcc577b185bf3d73",
+                "url": "https://api.github.com/repos/illuminate/collections/zipball/f9589f1063a449111dcaa1d68285b507d9483a95",
+                "reference": "f9589f1063a449111dcaa1d68285b507d9483a95",
                 "shasum": ""
             },
             "require": {
@@ -246,7 +246,7 @@
             "suggest": {
                 "symfony/var-dumper": "Required to use the dump method (^6.2)."
             },
-            "time": "2024-03-04T18:11:18+00:00",
+            "time": "2024-03-20T20:09:13+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -282,8 +282,8 @@
         },
         {
             "name": "illuminate/conditionable",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/conditionable.git",
@@ -331,8 +331,8 @@
         },
         {
             "name": "illuminate/container",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/container.git",
@@ -385,8 +385,8 @@
         },
         {
             "name": "illuminate/contracts",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/contracts.git",
@@ -494,8 +494,8 @@
         },
         {
             "name": "illuminate/macroable",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/macroable.git",
@@ -596,8 +596,8 @@
         },
         {
             "name": "illuminate/pipeline",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pipeline.git",
@@ -647,17 +647,17 @@
         },
         {
             "name": "illuminate/support",
-            "version": "v10.47.0",
-            "version_normalized": "10.47.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "a98f849a2a0f36fbcbec77d07cae680e240ccdc1"
+                "reference": "980d80017e859c8b1720892d952516e8c0b6708f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/a98f849a2a0f36fbcbec77d07cae680e240ccdc1",
-                "reference": "a98f849a2a0f36fbcbec77d07cae680e240ccdc1",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/980d80017e859c8b1720892d952516e8c0b6708f",
+                "reference": "980d80017e859c8b1720892d952516e8c0b6708f",
                 "shasum": ""
             },
             "require": {
@@ -685,7 +685,7 @@
                 "symfony/var-dumper": "Required to use the dd function (^6.2).",
                 "vlucas/phpdotenv": "Required to use the Env class and env helper (^5.4.1)."
             },
-            "time": "2024-03-02T00:22:09+00:00",
+            "time": "2024-03-11T21:46:45+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
