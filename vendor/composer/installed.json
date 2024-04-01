@@ -436,17 +436,17 @@
         },
         {
             "name": "illuminate/events",
-            "version": "v10.46.0",
-            "version_normalized": "10.46.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/events.git",
-                "reference": "8d84d6220a6b3446a0bf3e4138e2eb0e10792bb1"
+                "reference": "a931bfa88edc6ac52c9abbfd7b769343d321d3eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/events/zipball/8d84d6220a6b3446a0bf3e4138e2eb0e10792bb1",
-                "reference": "8d84d6220a6b3446a0bf3e4138e2eb0e10792bb1",
+                "url": "https://api.github.com/repos/illuminate/events/zipball/a931bfa88edc6ac52c9abbfd7b769343d321d3eb",
+                "reference": "a931bfa88edc6ac52c9abbfd7b769343d321d3eb",
                 "shasum": ""
             },
             "require": {
@@ -458,7 +458,7 @@
                 "illuminate/support": "^10.0",
                 "php": "^8.1"
             },
-            "time": "2023-10-30T00:59:35+00:00",
+            "time": "2024-03-04T14:41:04+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -543,8 +543,8 @@
         },
         {
             "name": "illuminate/pagination",
-            "version": "v10.46.0",
-            "version_normalized": "10.46.0.0",
+            "version": "v10.48.4",
+            "version_normalized": "10.48.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/pagination.git",
@@ -2135,17 +2135,17 @@
         },
         {
             "name": "symfony/var-dumper",
-            "version": "v7.0.0",
-            "version_normalized": "7.0.0.0",
+            "version": "v7.0.4",
+            "version_normalized": "7.0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/var-dumper.git",
-                "reference": "cf0220fc7607476fd0d001ab3ed9e830d1fdda56"
+                "reference": "e03ad7c1535e623edbb94c22cc42353e488c6670"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/cf0220fc7607476fd0d001ab3ed9e830d1fdda56",
-                "reference": "cf0220fc7607476fd0d001ab3ed9e830d1fdda56",
+                "url": "https://api.github.com/repos/symfony/var-dumper/zipball/e03ad7c1535e623edbb94c22cc42353e488c6670",
+                "reference": "e03ad7c1535e623edbb94c22cc42353e488c6670",
                 "shasum": ""
             },
             "require": {
@@ -2163,7 +2163,7 @@
                 "symfony/uid": "^6.4|^7.0",
                 "twig/twig": "^3.0.4"
             },
-            "time": "2023-11-27T12:39:18+00:00",
+            "time": "2024-02-15T11:33:06+00:00",
             "bin": [
                 "Resources/bin/var-dump-server"
             ],
@@ -2201,7 +2201,7 @@
                 "dump"
             ],
             "support": {
-                "source": "https://github.com/symfony/var-dumper/tree/v7.0.0"
+                "source": "https://github.com/symfony/var-dumper/tree/v7.0.4"
             },
             "funding": [
                 {
@@ -2298,17 +2298,17 @@
         },
         {
             "name": "webman/console",
-            "version": "v1.3.0",
-            "version_normalized": "1.3.0.0",
+            "version": "v1.3.4",
+            "version_normalized": "1.3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/webman-php/console.git",
-                "reference": "35f20376d679586341feadf92e6829f24343a3d0"
+                "reference": "ee50a1eca292eea5bf70661aa2ef722e1294814c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/webman-php/console/zipball/35f20376d679586341feadf92e6829f24343a3d0",
-                "reference": "35f20376d679586341feadf92e6829f24343a3d0",
+                "url": "https://api.github.com/repos/webman-php/console/zipball/ee50a1eca292eea5bf70661aa2ef722e1294814c",
+                "reference": "ee50a1eca292eea5bf70661aa2ef722e1294814c",
                 "shasum": ""
             },
             "require": {
@@ -2318,7 +2318,7 @@
             "require-dev": {
                 "workerman/webman": "^1.0"
             },
-            "time": "2023-12-04T09:13:02+00:00",
+            "time": "2024-01-23T03:25:23+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -2354,17 +2354,17 @@
         },
         {
             "name": "workerman/webman-framework",
-            "version": "v1.5.0",
-            "version_normalized": "1.5.0.0",
+            "version": "v1.5.16",
+            "version_normalized": "1.5.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/walkor/webman-framework.git",
-                "reference": "b79e34a0534212f57edcd874c02141dd9c5e998d"
+                "reference": "84335520a340ee60adf7cf17aeb0edb9536c24e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/walkor/webman-framework/zipball/b79e34a0534212f57edcd874c02141dd9c5e998d",
-                "reference": "b79e34a0534212f57edcd874c02141dd9c5e998d",
+                "url": "https://api.github.com/repos/walkor/webman-framework/zipball/84335520a340ee60adf7cf17aeb0edb9536c24e8",
+                "reference": "84335520a340ee60adf7cf17aeb0edb9536c24e8",
                 "shasum": ""
             },
             "require": {
@@ -2377,7 +2377,7 @@
             "suggest": {
                 "ext-event": "For better performance. "
             },
-            "time": "2023-02-01T06:57:40+00:00",
+            "time": "2024-01-15T12:11:49+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

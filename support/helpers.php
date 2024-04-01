@@ -27,10 +27,8 @@ use Twig\Error\SyntaxError;
 use Webman\App;
 use Webman\Config;
 use Webman\Route;
+use Workerman\Protocols\Http\Session;
 use Workerman\Worker;
-
-// Webman version
-const WEBMAN_VERSION = '1.4';
 
 // Project base path
 define('BASE_PATH', dirname(__DIR__));
@@ -192,14 +190,15 @@ function redirect(string $location, int $status = 302, array $headers = []): Res
  * @param string $template
  * @param array $vars
  * @param string|null $app
+ * @param string|null $plugin
  * @return Response
  */
-function view(string $template, array $vars = [], string $app = null): Response
+function view(string $template, array $vars = [], string $app = null, string $plugin = null): Response
 {
     $request = \request();
-    $plugin = $request->plugin ?? '';
+    $plugin = $plugin === null ? ($request->plugin ?? '') : $plugin;
     $handler = \config($plugin ? "plugin.$plugin.view.handler" : 'view.handler');
-    return new Response(200, [], $handler::render($template, $vars, $app));
+    return new Response(200, [], $handler::render($template, $vars, $app, $plugin));
 }
 
 /**
@@ -302,7 +301,7 @@ function route(string $name, ...$parameters): string
  * Session
  * @param mixed $key
  * @param mixed $default
- * @return mixed
+ * @return mixed|bool|Session
  */
 function session($key = null, $default = null)
 {
@@ -381,7 +380,7 @@ function copy_dir(string $source, string $dest, bool $overwrite = false)
         $files = scandir($source);
         foreach ($files as $file) {
             if ($file !== "." && $file !== "..") {
-                copy_dir("$source/$file", "$dest/$file");
+                copy_dir("$source/$file", "$dest/$file", $overwrite);
             }
         }
     } else if (file_exists($source) && ($overwrite || !file_exists($dest))) {
@@ -421,7 +420,8 @@ function worker_bind($worker, $class)
         'onBufferFull',
         'onBufferDrain',
         'onWorkerStop',
-        'onWebSocketConnect'
+        'onWebSocketConnect',
+        'onWorkerReload'
     ];
     foreach ($callbackMap as $name) {
         if (method_exists($class, $name)) {
@@ -514,4 +514,15 @@ function cpu_count(): int
         }
     }
     return $count > 0 ? $count : 4;
+}
+
+/**
+ * Get request parameters, if no parameter name is passed, an array of all values is returned, default values is supported
+ * @param string|null $param param's name
+ * @param mixed|null $default default value
+ * @return mixed|null
+ */
+function input(string $param = null, $default = null)
+{
+    return is_null($param) ? request()->all() : request()->input($param, $default);
 }
