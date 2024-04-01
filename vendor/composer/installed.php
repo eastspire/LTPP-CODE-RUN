@@ -3,7 +3,7 @@
         'name' => 'ltpp/coderun',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '142846e059f70e0323d18882c9b9d8dfeceb2368',
+        'reference' => '0e21e5f5a05d109eafe91b814f52d9793285f8b1',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -121,7 +121,7 @@
         'ltpp/coderun' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '142846e059f70e0323d18882c9b9d8dfeceb2368',
+            'reference' => '0e21e5f5a05d109eafe91b814f52d9793285f8b1',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
