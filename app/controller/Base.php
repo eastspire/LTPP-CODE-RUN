@@ -894,13 +894,13 @@ class Base
             // 可执行文件不能提前生成或写入
             // 如果提前生成或写入会导致编译器生成可执行文件失败
             $runcodefilepath = $filepath . 'main';
-            //输入文件
+            // 输入文件
             $inpath = $runcodefilepath . '.in';
             Base::writeToFile($inpath, $testin);
-            //输出文件
+            // 输出文件
             $outpath = $runcodefilepath . '.out';
             Base::writeToFile($outpath, '');
-            //错误文件
+            // 错误文件
             $errpath = $runcodefilepath . '.err';
             Base::writeToFile($errpath, '');
         } catch (Exception $e) {
@@ -912,6 +912,65 @@ class Base
             'inpath' => $inpath,
             'outpath' => $outpath,
             'errpath' => $errpath,
+        ];
+    }
+
+    /**
+     * 获取用户代码运行结果
+     * @param string $code
+     * @param string $userlanguage
+     * @param string $testin
+     * @param string $child_path
+     * @return array $json
+     */
+    static public function getUserCodeRunResult($code = '', $userlanguage = Language::cpp, $testin = '', $child_path = '')
+    {
+        // 用户文件夹
+        $dir_res = Base::creatCodeRunDirFile($child_path, $testin);
+        $mainfile = $dir_res['mainfile'];
+        $filepath = $dir_res['filepath'];
+        $runcodefilepath = $dir_res['runcodefilepath'];
+        $inpath = $dir_res['inpath'];
+        $outpath = $dir_res['outpath'];
+        $errpath = $dir_res['errpath'];
+
+        // 代码写入文件
+        $compiler_res_json = Base::writeCodeToFile($userlanguage, $code, $filepath, $runcodefilepath);
+
+        if (!isset($compiler_res_json['code']) || $compiler_res_json['code'] != 1) {
+            Base::deleteAllFile($filepath);
+            return $compiler_res_json;
+        }
+
+        $out = '';
+
+        //运行
+        $out = Base::run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, Base::$compiler_timeout_time, Base::$code_run_limittime, Base::$code_run_limitmemory);
+
+        Base::deleteAllFile($filepath);
+
+        $run_resource_consumption = Base::getCodeTimeMemory($out);
+
+        if (!$run_resource_consumption || !isset($run_resource_consumption['status'])) {
+            return ['code' => -1, 'data' => Base::$code_run_error . '！', 'memory' => 0, 'time' => 0];
+        }
+
+        $status = $run_resource_consumption['status'] ?? 0;
+        $time_used = $run_resource_consumption['time_used'] ?? 0;
+        $memory_used = $run_resource_consumption['memory_used'] ?? 0;
+        $msg = $run_resource_consumption['msg'] ?? '';
+
+        // 去除路径信息
+        $msg = Base::removeMsgSandboxPath($mainfile, $msg);
+
+        if ($status == Base::$judge_code_finish) {
+            return ['code' => 1, 'data' => $msg, 'time' => $time_used, 'memory' => $memory_used];
+        }
+        return [
+            'code' => -1,
+            'data' =>  $msg,
+            'time' => $time_used,
+            'memory' => $memory_used
         ];
     }
 };
