@@ -731,7 +731,7 @@ class Base
                 case Language::typescript:
                     $limittime <<= 1;
                     $limitmemory <<= 1;
-                    $compiler_cmd = '/usr/local/nodejs/bin/tsc@-t@es2022@--outFile@' . $runcodefilepath . '.js' . $runcodefilepath . '.ts';
+                    $compiler_cmd = '/usr/local/nodejs/bin/tsc@-t@es2022@--outFile@' . $runcodefilepath . '.js@' . $runcodefilepath . '.ts';
                     $run_cmd =  '/usr/bin/node@' . $runcodefilepath . '.js';
                     Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
@@ -759,7 +759,7 @@ class Base
                 case Language::csharp:
                     $limittime <<= 1;
                     $limitmemory <<= 1;
-                    $compiler_cmd = '/usr/bin/mcs@-out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs';
+                    $compiler_cmd = '/usr/bin/mcs@-out:' . $runcodefilepath . '@' . $runcodefilepath . '.cs';
                     $run_cmd = '/usr/bin/mono@' . $runcodefilepath;
                     Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                 default:
