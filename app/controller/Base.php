@@ -48,7 +48,12 @@ class Base
     static $judgepath = '/JudgeServer/judge';
 
     /**
-     * 时间限制（MS）
+     * 编译时间限制（MS）
+     */
+    static $compiler_timeout_time = 4000;
+
+    /**
+     * 运行时间限制（MS）
      */
     static $code_run_limittime = 4000;
 
@@ -145,24 +150,29 @@ class Base
     static $judge_server_error = 0;
 
     /**
-     * 判题机用户代码运行完成状态码
+     * 判题机用户代码正常运行完成状态码
      */
     static $judge_code_finish = 1;
 
     /**
+     * 判题机编译错误状态码
+     */
+    static $judge_code_compiler_error = 2;
+
+    /**
      * 判题机用户代码运行TLE状态码
      */
-    static $judge_code_tle = 2;
+    static $judge_code_tle = 3;
 
     /**
      * 判题机用户代码运行MLE状态码
      */
-    static $judge_code_mle = 3;
+    static $judge_code_mle = 4;
 
     /**
      * 判题机用户代码运行RE状态码
      */
-    static $judge_code_re = 4;
+    static $judge_code_re = 5;
 
     /**
      * 代码TLE关键词
@@ -254,6 +264,75 @@ class Base
     }
 
     /**
+     * 去除沙箱路径信息
+     * @param string $mainfile 可执行文件路径
+     * @param string $str 文本
+     */
+    static public function removeMsgSandboxPath($mainfile = '', $str = '')
+    {
+        try {
+            $tp = Base::utfsubstr(Base::$sandbox_path, 1, strlen(Base::$sandbox_path)) . $mainfile;
+            $str = str_replace([$tp, $mainfile], '', $str);
+            Base::removeBr($str);
+            if (strlen($str) > Base::$code_out_limit) {
+                $str = Base::utfsubstr($str, 0, Base::$code_out_limit, true) . "\n" . '【仅显示前' . Base::$code_out_limit . '个字符】';
+            }
+            return $str;
+        } catch (Exception $e) {
+        }
+        return '';
+    }
+
+    /**
+     * 运行shell命令
+     */
+    public static function runExec($command = '', &$out = '', &$run_exec_code = 0)
+    {
+        try {
+            $run_exec_code = 0;
+            $pipes = [];
+            $descriptorspec = [
+                0 => ['pipe', 'r'],  // 标准输入
+                1 => ['pipe', 'w'],  // 标准输出
+                2 => ['pipe', 'w']   // 标准错误输出
+            ];
+            $process = proc_open($command, $descriptorspec, $pipes);
+            if (is_resource($process)) {
+                // 关闭标准输入管道
+                fclose($pipes[0]);
+                // 读取标准输出和标准错误输出
+                $stdout = stream_get_contents($pipes[1]);
+                $stderr = stream_get_contents($pipes[2]);
+                // 关闭标准输出和标准错误输出管道
+                fclose($pipes[1]);
+                fclose($pipes[2]);
+                // 注册信号处理程序                
+                pcntl_signal(SIGTERM, function ($signo) {
+                    $pid = getmypid();
+                    posix_kill(-$pid, SIGKILL);
+                });
+                $pid = intval(proc_get_status($process)['pid']);
+                // 等待进程终止
+                pcntl_waitpid($pid, $run_exec_code);
+                // 输出结果或错误信息
+                if (!empty($stdout)) {
+                    $out = $stdout;
+                }
+                if (!empty($stderr)) {
+                    $out =  $stderr;
+                }
+                // 取消注册信号处理程序
+                pcntl_signal(SIGTERM, SIG_DFL);
+                // 关闭进程
+                proc_close($process);
+            }
+        } catch (Exception $e) {
+            $out = Base::$server_error_msg;
+            $run_exec_code = 0;
+        }
+    }
+
+    /**
      * 判断路径是否存在（路径以/开头），不存在创建路径中的文件夹
      * @param string $path 路径
      * @param int $grade 权限
@@ -313,21 +392,21 @@ class Base
         // 挂载（C#必须这步）
         $proc_path = $path . 'proc';
         Base::judgeCreatPath($proc_path);
-        exec('umount ' . $proc_path . ' > /dev/null 2>&1');
-        exec('mount -t proc none ' . $proc_path . ' > /dev/null 2>&1');
+        Base::runExec('umount ' . $proc_path . ' > /dev/null 2>&1');
+        Base::runExec('mount -t proc none ' . $proc_path . ' > /dev/null 2>&1');
         // 系统时间
-        exec("cp -p -r --parents -f /etc/timezone $path;cp -p -r --parents -f /etc/localtime $path;");
+        Base::runExec("cp -p -r --parents -f /etc/timezone $path;cp -p -r --parents -f /etc/localtime $path;");
         // ln安装
-        exec("cp -p -r --parents -f /usr/bin/ln $path");
+        Base::runExec("cp -p -r --parents -f /usr/bin/ln $path");
         // 环境安装
-        exec("cp -p -r --parents -f /usr/share/ $path");
-        exec("cp -p --parents -f /bin/bash $path;cp -p --parents -f /bin/sh $path;cp -p -r --parents -f /usr/lib/mono $path;cp -p --parents -f /usr/bin/mono $path;cp -p --parents -f /usr/bin/gem $path;cp -p --parents -f /usr/bin/gem3.1 $path;cp -p --parents -f /usr/bin/ruby $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/php $path;cp -p --parents -f /usr/bin/python3 $path;cp -p -r --parents -f /root/.cargo $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/local/nodejs $path;cp -p --parents -f /usr/bin/go $path;cp -p --parents -f /usr/bin/g++ $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /lib64/ld-linux-x86-64.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/librt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libxml2.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libssl.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypto.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpcre2-8.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libz.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libsodium.so.23 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libargon2.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicuuc.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/liblzma.so.5 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicudata.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libruby-3.1.so.3.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgmp.so.10 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libtinfo.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libc.so.6 $path;");
-        exec("cp -p -r --parents -f /usr/lib $path;cp -p -r --parents -f /usr/lib32 $path;cp -p -r --parents -f /usr/lib64 $path;cp -p -r --parents -f /etc/python3 $path;cp -p -r --parents -f /usr/lib/python3 $path;cp -p -r --parents -f /usr/lib/jvm/ $path;cp -p --parents -f /usr/lib/x86_64-linux-gnu/libexpat.so.1 $path;cp -p --parents -f /usr/bin/python3 $path;cp -p --parents -f /etc/alternatives/java $path;cp -p -r --parents -f /etc/ssl/certs/java $path;cp -p --parents -f /var/lib/dpkg/alternatives/java $path;cp -p --parents -f /etc/alternatives/javac $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /var/lib/dpkg/alternatives/javac $path;cp -p --parents -f /etc/alternatives/php $path;cp -p --parents -f /etc/cron.d/php $path;cp -p -r --parents -f /etc/php $path;cp -p -r --parents -f /usr/lib/php $path;cp -p -r --parents -f /usr/include/php $path;cp -p --parents -f /var/lib/dpkg/alternatives/php $path;cp -p -r --parents -f /var/lib/php $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/lib/x86_64-linux-gnu/ruby $path;cp -p -r --parents -f /usr/lib/ruby $path;cp -p --parents -f /usr/bin/ruby $path;");
+        Base::runExec("cp -p -r --parents -f /usr/share/ $path");
+        Base::runExec("cp -p --parents -f /bin/bash $path;cp -p --parents -f /bin/sh $path;cp -p -r --parents -f /usr/lib/mono $path;cp -p --parents -f /usr/bin/mono $path;cp -p --parents -f /usr/bin/gem $path;cp -p --parents -f /usr/bin/gem3.1 $path;cp -p --parents -f /usr/bin/ruby $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/node $path;cp -p --parents -f /usr/bin/php $path;cp -p --parents -f /usr/bin/python3 $path;cp -p -r --parents -f /root/.cargo $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/local/nodejs $path;cp -p --parents -f /usr/bin/go $path;cp -p --parents -f /usr/bin/g++ $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /lib64/ld-linux-x86-64.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/librt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libxml2.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libssl.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypto.so.3 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpcre2-8.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libz.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libsodium.so.23 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libargon2.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicuuc.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/liblzma.so.5 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libicudata.so.72 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libdl.so.2 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libstdc++.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libpthread.so.0 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libruby-3.1.so.3.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgmp.so.10 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libcrypt.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libm.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libgcc_s.so.1 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libtinfo.so.6 $path;cp -p --parents -f /lib/x86_64-linux-gnu/libc.so.6 $path;");
+        Base::runExec("cp -p -r --parents -f /usr/lib $path;cp -p -r --parents -f /usr/lib32 $path;cp -p -r --parents -f /usr/lib64 $path;cp -p -r --parents -f /etc/python3 $path;cp -p -r --parents -f /usr/lib/python3 $path;cp -p -r --parents -f /usr/lib/jvm/ $path;cp -p --parents -f /usr/lib/x86_64-linux-gnu/libexpat.so.1 $path;cp -p --parents -f /usr/bin/python3 $path;cp -p --parents -f /etc/alternatives/java $path;cp -p -r --parents -f /etc/ssl/certs/java $path;cp -p --parents -f /var/lib/dpkg/alternatives/java $path;cp -p --parents -f /etc/alternatives/javac $path;cp -p --parents -f /usr/bin/javac $path;cp -p --parents -f /var/lib/dpkg/alternatives/javac $path;cp -p --parents -f /etc/alternatives/php $path;cp -p --parents -f /etc/cron.d/php $path;cp -p -r --parents -f /etc/php $path;cp -p -r --parents -f /usr/lib/php $path;cp -p -r --parents -f /usr/include/php $path;cp -p --parents -f /var/lib/dpkg/alternatives/php $path;cp -p -r --parents -f /var/lib/php $path;cp -p --parents -f /usr/bin/mcs $path;cp -p -r --parents -f /usr/lib/x86_64-linux-gnu/ruby $path;cp -p -r --parents -f /usr/lib/ruby $path;cp -p --parents -f /usr/bin/ruby $path;");
         // java安装
-        exec('chroot ' . $path . ' /bin/sh -c "ln -s /usr/lib/jvm/java-17-openjdk-amd64/bin/java /usr/bin/java" > /dev/null 2>&1');
+        Base::runExec('chroot ' . $path . ' /bin/sh -c "ln -s /usr/lib/jvm/java-17-openjdk-amd64/bin/java /usr/bin/java" > /dev/null 2>&1');
         // 权限设置
-        exec('chmod -R --no-preserve-root 777 ' . $path . ' > /dev/null 2>&1');
-        exec('chown -R --no-preserve-root ltpp:ltpp ' . $path . ' > /dev/null 2>&1');
+        Base::runExec('chmod -R --no-preserve-root 777 ' . $path . ' > /dev/null 2>&1');
+        Base::runExec('chown -R --no-preserve-root ltpp:ltpp ' . $path . ' > /dev/null 2>&1');
     }
 
     /**
@@ -419,13 +498,9 @@ class Base
             }
             Base::deleteAllFile(Base::$judge_install_path);
             Base::judgeCreatPath(Base::$judge_install_path);
-            exec('cp -f /home/LTPP/InstallMust/JudgeServer/judge ' . Base::$judge_install_path . ' 2>&1', $out);
+            Base::runExec('cp -f /home/LTPP/InstallMust/JudgeServer/judge ' . Base::$judge_install_path . ' 2>&1', $out);
             Base::chmodFile('/JudgeServer', 0555);
-            if (!empty($out)) {
-                $res = '';
-                foreach ($out as $tem) {
-                    $res .= $tem . "\n";
-                }
+            if ($out) {
                 return false;
             }
             Base::installSandboxEnv();
@@ -529,50 +604,39 @@ class Base
     }
 
     /**
-     * 编译器
+     * 代码写入文件
      * @param string $userlanguage
      * @param string $code
      * @param string $filepath
      * @param string $runcodefilepath
-     * @param int $limittime
      * @return array $res
      */
-    static public function compiler($userlanguage, $code, $filepath, $runcodefilepath, $limittime)
+    static public function writeCodeToFile($userlanguage, $code, $filepath, $runcodefilepath)
     {
-        $out = [];
         try {
-            $timeout_time = ceil($limittime / 1000) << 2;
-            $run_exec_code = 0;
             //编译
             switch ($userlanguage) {
                 case Language::rust:
                     Base::writeToFile($runcodefilepath . '.rs', $code);
-                    exec('timeout ' . $timeout_time . ' /root/.cargo/bin/rustc -O -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.rs 2>&1', $out, $run_exec_code);
                     break;
                 case Language::c:
                     Base::writeToFile($runcodefilepath . '.c', $code);
-                    exec('timeout ' . $timeout_time . ' /usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.c -std=c++2a 2>&1', $out, $run_exec_code);
                     break;
                 case Language::cpp:
                     Base::writeToFile($runcodefilepath . '.cpp', $code);
-                    exec('timeout ' . $timeout_time . ' /usr/bin/g++ -o ' . $runcodefilepath . ' ' . $runcodefilepath . '.cpp -std=c++2a 2>&1', $out, $run_exec_code);
                     break;
                 case Language::golang:
-                    exec('timeout ' . $timeout_time . ' /usr/bin/go env -w GO111MODULE=auto');
                     Base::writeToFile($runcodefilepath . '.go', $code);
-                    exec('timeout ' . $timeout_time . ' /usr/bin/go build -o ' . $filepath . ' ' . $runcodefilepath . '.go 2>&1', $out, $run_exec_code);
                     break;
                 case Language::java:
                     $runcodefilepath = $filepath . 'Main';
                     Base::writeToFile($runcodefilepath . '.java', $code);
-                    exec('timeout ' . $timeout_time . ' /usr/bin/javac -J-Dfile.encoding=UTF-8 ' . $runcodefilepath . '.java 2>&1', $out, $run_exec_code);
                     break;
                 case Language::javascript:
                     Base::writeToFile($runcodefilepath . '.js', $code);
                     break;
                 case Language::typescript:
                     Base::writeToFile($runcodefilepath . '.ts', $code);
-                    exec('timeout ' . $timeout_time . ' /usr/local/nodejs/bin/tsc -t es2022 --outFile ' . $runcodefilepath . '.js ' . $runcodefilepath . '.ts 2>&1', $out, $run_exec_code);
                     break;
                 case Language::php:
                     Base::writeToFile($runcodefilepath . '.php', $code);
@@ -585,23 +649,14 @@ class Base
                     break;
                 case Language::csharp:
                     Base::writeToFile($runcodefilepath . '.cs', $code);
-                    exec('timeout ' . $timeout_time . ' /usr/bin/mcs -out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs 2>&1', $out, $run_exec_code);
                     break;
                 default:
                     return [
                         'code' => -1,
-                        'data' => '请选择语言后提交！',
-                        'memory' => 0,
-                        'time' => 0
+                        'result' => '请选择语言后提交！',
+                        'usememory' => 0,
+                        'usetime' => 0
                     ];
-            }
-            if (Base::judgeIsTimeout($run_exec_code)) {
-                return [
-                    'code' => -1,
-                    'data' => Base::$timout_error_msg,
-                    'memory' => 0,
-                    'time' => $timeout_time * 1000,
-                ];
             }
         } catch (Exception $e) {
             return [
@@ -613,7 +668,7 @@ class Base
         }
         return [
             'code' => 1,
-            'data' => $out,
+            'data' => '',
             'memory' => 0,
             'time' => 0
         ];
@@ -627,108 +682,100 @@ class Base
      * @param string $outpath
      * @param string $errpath
      * @param string $runcodefilepath
+     * @param int $compiler_timeout_time
      * @param int $limittime
      * @param int limitmemory
      */
-    static public function run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $limittime, $limitmemory)
+    static public function run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, $compiler_timeout_time, $limittime, $limitmemory)
     {
-        $out = [];
+        $out = '';
+        $compiler_cmd = '""';
+        $run_cmd = '';
         try {
-            $timeout_time = ceil($limittime / 1000) << 2;
-            $run_exec_code = 0;
+            // 运行
             switch ($userlanguage) {
                 case Language::rust:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $compiler_cmd = '/root/.cargo/bin/rustc@-O@-o@' . $runcodefilepath . '@' . $runcodefilepath . '.rs';
+                    $run_cmd = $runcodefilepath;
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd  . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                 case Language::c:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $compiler_cmd = '/usr/bin/g++@-o@' . $runcodefilepath . '@' . $runcodefilepath . '.c@-std=c++2a';
+                    $run_cmd =  $runcodefilepath;
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd  . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::cpp:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $compiler_cmd = '/usr/bin/g++@-o@' . $runcodefilepath . '@' . $runcodefilepath . '.cpp@-std=c++2a';
+                    $run_cmd =  $runcodefilepath;
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::golang:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' ' . $runcodefilepath . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    Base::runExec('/usr/bin/go env -w GO111MODULE=auto');
+                    $compiler_cmd = '/usr/bin/go@build@-o@' . $filepath . '@' . $runcodefilepath . '.go';
+                    $run_cmd =  $runcodefilepath;
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd  . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::java:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/java@-cp@' . $filepath . '@Main ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '/usr/bin/javac@-J-Dfile.encoding=UTF-8@' . $runcodefilepath . '.java';
+                    $run_cmd = '/usr/bin/java@-cp@' . $filepath . '@Main';
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::javascript:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '""';
+                    $run_cmd = '/usr/bin/node@' . $runcodefilepath . '.js';
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::typescript:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/node@' . $runcodefilepath . '.js ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '/usr/local/nodejs/bin/tsc@-t@es2022@--outFile@' . $runcodefilepath . '.js' . $runcodefilepath . '.ts';
+                    $run_cmd =  '/usr/bin/node@' . $runcodefilepath . '.js';
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::php:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/php@' . $runcodefilepath . '.php ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '""';
+                    $run_cmd = '/usr/bin/php@' . $runcodefilepath . '.php';
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::python:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/python3@' . $runcodefilepath . '.py ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '""';
+                    $run_cmd = '/usr/bin/python3@' . $runcodefilepath . '.py';
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::ruby:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/ruby@' . $runcodefilepath . '.rb ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '""';
+                    $run_cmd = '/usr/bin/ruby@' . $runcodefilepath . '.rb';
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                     break;
                 case Language::csharp:
-                    exec('timeout ' . $timeout_time . ' ' . Base::$judgepath . ' /usr/bin/mono@' . $runcodefilepath . ' ' . ($limittime << 1) . ' ' . ($limitmemory << 1) . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath . ' 2>&1', $out, $run_exec_code);
+                    $limittime <<= 1;
+                    $limitmemory <<= 1;
+                    $compiler_cmd = '/usr/bin/mcs@-out:' . $runcodefilepath . ' ' . $runcodefilepath . '.cs';
+                    $run_cmd = '/usr/bin/mono@' . $runcodefilepath;
+                    Base::runExec(Base::$judgepath . ' ' . $compiler_cmd . ' ' . $run_cmd . ' ' . $compiler_timeout_time . ' ' . $limittime . ' ' . $limitmemory . ' ' . $inpath . ' ' . $outpath . ' ' . $errpath, $out);
                 default:
                     break;
             }
-            if (Base::judgeIsTimeout($run_exec_code)) {
-                return [json_encode([
-                    'status' => Base::$judge_server_error,
-                    'time_used' => $timeout_time * 1000,
-                    'memory_used' => 0,
-                    'msg' => Base::$timout_error_msg
-                ])];
-            }
         } catch (Exception $e) {
-            return [json_encode([
-                'status' => Base::$judge_server_error,
-                'time_used' => 0,
-                'memory_used' => 0,
-                'msg' => Base::$server_error_msg
-            ])];
+            return [
+                json_encode([
+                    'status' => Base::$judge_server_error,
+                    'time_used' => 0,
+                    'memory_used' => 0,
+                    'msg' => Base::$server_error_msg
+                ])
+            ];
         }
         return $out;
-    }
-
-    /**
-     * 判断是否超时
-     */
-    static public function judgeIsTimeout($run_exec_code)
-    {
-        try {
-            return $run_exec_code == 124;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * 获取文本
-     */
-    static public function getFileText($file_path)
-    {
-        $text = '';
-        if (file_exists($file_path)) {
-            $text = file_get_contents($file_path);
-        }
-        return Base::textToSafeText($text);
-    }
-
-    /**
-     * 文本安全转换
-     */
-    static public function textToSafeText($text = '')
-    {
-        try {
-            $encoding = mb_detect_encoding($text);
-            if (!$encoding) {
-                $encoding = Base::$str_encoding;
-            }
-            $text = mb_convert_encoding($text, 'UTF-8', $encoding);
-            return $text;
-        } catch (Exception $e) {
-        }
-        return '';
     }
 
     /**
