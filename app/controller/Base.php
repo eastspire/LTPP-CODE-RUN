@@ -783,7 +783,7 @@ class Base
      * @param string $str
      * @return array $res
      */
-    static public function getCodeTimeMemory($str)
+    static public function getCodeTimeMemory(&$str)
     {
         $status = 0;
         $time_used = 0;
@@ -810,9 +810,19 @@ class Base
         } catch (Exception $e) {
             // 触发错误的情况是判题机输出 Segmentation fault (core dumped) 导致解析json失败 而判题机触发该错误是不断分配内存不回收触发安全机制导致程序崩溃
             // 由于具体分配内存大小不确定，所以按照 RE 处理
-            return ['status' => 4, 'time_used' => $time_used, 'memory_used' => $memory_used, 'msg' => $msg];
+            return [
+                'status' => 4,
+                'time_used' => $time_used,
+                'memory_used' => $memory_used,
+                'msg' => $msg
+            ];
         }
-        return ['status' => $status, 'time_used' => $time_used, 'memory_used' => $memory_used, 'msg' => $msg];
+        return [
+            'status' => $status,
+            'time_used' => $time_used,
+            'memory_used' => $memory_used,
+            'msg' => $msg
+        ];
     }
 
     /**
@@ -945,7 +955,17 @@ class Base
         $out = '';
 
         //运行
-        $out = Base::run($userlanguage, $filepath, $inpath, $outpath, $errpath, $runcodefilepath, Base::$compiler_timeout_time, Base::$code_run_limittime, Base::$code_run_limitmemory);
+        $out = Base::run(
+            $userlanguage,
+            $filepath,
+            $inpath,
+            $outpath,
+            $errpath,
+            $runcodefilepath,
+            Base::$compiler_timeout_time,
+            Base::$code_run_limittime,
+            Base::$code_run_limitmemory
+        );
 
         Base::deleteAllFile($filepath);
 
