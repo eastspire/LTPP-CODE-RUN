@@ -791,6 +791,9 @@ class Base
         $msg = '';
         try {
             $res = json_decode($str, true);
+            if (!$res) {
+                throw new Exception('');
+            }
             if (!isset($res['status']) || !$res['status']) {
                 $res['status'] = 0;
             }
@@ -808,13 +811,14 @@ class Base
             $memory_used = (int) $res['memory_used'];
             $msg = $res['msg'];
         } catch (Exception $e) {
-            // 触发错误的情况是判题机输出 Segmentation fault (core dumped) 导致解析json失败 而判题机触发该错误是不断分配内存不回收触发安全机制导致程序崩溃
+            // 触发错误的情况是判题机输出 Segmentation fault (core dumped) 导致解析json失败
+            // 而判题机触发该错误是不断分配内存不回收触发安全机制导致程序崩溃
             // 由于具体分配内存大小不确定，所以按照 RE 处理
             return [
-                'status' => 4,
+                'status' => Base::$judge_code_re,
                 'time_used' => $time_used,
                 'memory_used' => $memory_used,
-                'msg' => $msg
+                'msg' => Base::$code_run_re,
             ];
         }
         return [
