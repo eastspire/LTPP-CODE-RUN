@@ -815,21 +815,21 @@ class Base
             if (!$res) {
                 throw new Exception('');
             }
-            if (!isset($res['status']) || !$res['status']) {
+            if (!isset($res['status']) || $res['status'] == null) {
                 $res['status'] = 0;
             }
-            if (!isset($res['time_used']) || !$res['time_used']) {
+            if (!isset($res['time_used']) || $res['time_used'] == null) {
                 $res['time_used'] = 0;
             }
-            if (!isset($res['memory_used']) || !$res['memory_used']) {
+            if (!isset($res['memory_used']) || $res['memory_used'] == null) {
                 $res['memory_used'] = 0;
             }
-            if (!isset($res['msg']) || !$res['msg']) {
+            if (!isset($res['msg']) || $res['msg'] == null) {
                 $res['msg'] = '';
             }
-            $status = (int) $res['status'];
-            $time_used = (int) $res['time_used'];
-            $memory_used = (int) $res['memory_used'];
+            $status = intval($res['status']);
+            $time_used = intval($res['time_used']);
+            $memory_used = intval($res['memory_used']);
             $msg = $res['msg'];
         } catch (Exception $e) {
             // 触发错误的情况是判题机输出 Segmentation fault (core dumped) 导致解析json失败
@@ -839,7 +839,7 @@ class Base
                 'status' => Base::$judge_code_re,
                 'time_used' => $time_used,
                 'memory_used' => $memory_used,
-                'msg' => Base::$code_run_re,
+                'msg' => Base::$code_run_re
             ];
         }
         return [
