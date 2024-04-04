@@ -38,9 +38,9 @@ class Base
     static $code_up_fail_msg = '代码提交失败！请重新提交！';
 
     /**
-     * 异常超时提示
+     * 不支持的语言提示
      */
-    static $timout_error_msg = '系统检测到异常代码导致运行超时！请修改代码后重新运行！';
+    static $no_support_language_msg = '该语言暂不支持！请重新选择语言后提交！';
 
     /**
      * 判题机路径
@@ -478,7 +478,12 @@ class Base
             case Language::ruby:
                 break;
             default:
-                return ['code' => -1, 'data' => '该语言不支持！请重新选择语言后提交！', 'memory' => 0, 'time' => 0];
+                return [
+                    'code' => -1,
+                    'data' => Base::$no_support_language_msg,
+                    'memory' => 0,
+                    'time' => 0
+                ];
         }
         return ['code' => 1, 'data' => Base::$code_safe, 'memory' => 0, 'time' => 0];
     }
@@ -499,10 +504,10 @@ class Base
             Base::deleteAllFile(Base::$judge_install_path);
             Base::judgeCreatPath(Base::$judge_install_path);
             Base::runExec('cp -f /home/LTPP/InstallMust/JudgeServer/judge ' . Base::$judge_install_path . ' 2>&1', $out);
-            Base::chmodFile('/JudgeServer', 0555);
             if ($out) {
                 return false;
             }
+            Base::chmodFile('/JudgeServer', 0555);
             Base::installSandboxEnv();
         } catch (Exception $e) {
             return false;
@@ -653,7 +658,7 @@ class Base
                 default:
                     return [
                         'code' => -1,
-                        'result' => '请选择语言后提交！',
+                        'result' => Base::$no_support_language_msg,
                         'usememory' => 0,
                         'usetime' => 0
                     ];
