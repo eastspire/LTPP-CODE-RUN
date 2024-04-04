@@ -31,7 +31,7 @@ class Index
         if (!isset(Base::$language_map[$userlanguage])) {
             return json([
                 'code' => -1,
-                'data' => '该语言不支持！请重新选择语言后提交！',
+                'data' => Base::$no_support_language_msg,
                 'memory' => 0,
                 'time' => 0
             ]);
@@ -45,7 +45,7 @@ class Index
         if (!Base::judgeJudgeInstall()) {
             return json([
                 'code' => -1,
-                'data' => '判题机未安装',
+                'data' => Base::$judge_not_install_msg,
                 'memory' => 0,
                 'time' => 0
             ]);

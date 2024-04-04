@@ -43,6 +43,11 @@ class Base
     static $no_support_language_msg = '该语言暂不支持！请重新选择语言后提交！';
 
     /**
+     * 空代码提示
+     */
+    static $empty_code_msg = '请编写代码后再次提交哦！';
+
+    /**
      * 判题机路径
      */
     static $judgepath = '/JudgeServer/judge';
@@ -177,37 +182,42 @@ class Base
     /**
      * 代码TLE关键词
      */
-    static $code_run_tle = 'TLE';
+    static $code_run_tle = 'TLE！';
 
     /**
      * 代码RE关键词
      */
-    static $code_run_re = 'RE';
+    static $code_run_re = 'RE！';
 
     /**
      * 代码MLE关键词
      */
-    static $code_run_mle = 'MLE';
+    static $code_run_mle = 'MLE！';
 
     /**
      * 代码编译出错关键词
      */
-    static $code_run_compiler_wrong = '编译出错';
+    static $code_run_compiler_wrong = '编译出错！';
 
     /**
      * 代码运行出错关键词
      */
-    static $code_run_running_wrong = '运行出错';
+    static $code_run_running_wrong = '运行出错！';
 
     /**
      * 判题机编译异常提示
      */
-    static $code_compiler_error = '判题机编译异常';
+    static $code_compiler_error = '判题机编译异常！';
 
     /**
      * 判题机运行异常提示
      */
-    static $code_run_error = '判题机运行异常';
+    static $code_run_error = '判题机运行异常！';
+
+    /**
+     * 判题机未安装
+     */
+    static $judge_not_install_msg = '判题机未安装！';
 
     /**
      * 测试用例路径
@@ -452,7 +462,12 @@ class Base
     static public function judgeCodeSafe($code, $userlanguage)
     {
         if (!$code) {
-            return ['code' => -1, 'data' => '请编写代码后再次提交哦！', 'memory' => 0, 'time' => 0];
+            return [
+                'code' => -1,
+                'data' => Base::$empty_code_msg,
+                'memory' => 0,
+                'time' => 0
+            ];
         }
         switch ($userlanguage) {
             case Language::c:
@@ -981,7 +996,12 @@ class Base
         $run_resource_consumption = Base::getCodeTimeMemory($out);
 
         if (!$run_resource_consumption || !isset($run_resource_consumption['status'])) {
-            return ['code' => -1, 'data' => Base::$code_run_error . '！', 'memory' => 0, 'time' => 0];
+            return [
+                'code' => -1,
+                'data' => Base::$code_run_error,
+                'memory' => 0,
+                'time' => 0
+            ];
         }
 
         $status = $run_resource_consumption['status'] ?? 0;
@@ -993,7 +1013,12 @@ class Base
         $msg = Base::removeMsgSandboxPath($mainfile, $msg);
 
         if ($status == Base::$judge_code_finish) {
-            return ['code' => 1, 'data' => $msg, 'time' => $time_used, 'memory' => $memory_used];
+            return [
+                'code' => 1,
+                'data' => $msg,
+                'time' => $time_used,
+                'memory' => $memory_used
+            ];
         }
         return [
             'code' => -1,
