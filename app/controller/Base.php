@@ -55,12 +55,12 @@ class Base
     /**
      * 编译时间限制（MS）
      */
-    static $compiler_timeout_time = 4000;
+    static $compiler_timeout_time = 10000;
 
     /**
      * 运行时间限制（MS）
      */
-    static $code_run_limittime = 4000;
+    static $code_run_limittime = 6000;
 
     /**
      * 内存限制（KB）
