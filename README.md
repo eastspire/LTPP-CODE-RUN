@@ -1,2 +1,5 @@
-# LTPP CODE-RUN
-> LTPP CODE-RUN代码判题机
+# LTPP 宇宙文档
+
+> [GITHUB 静态页](https://ltpp-system.github.io/ltpp-docs/LTPP-CODE-RUN)
+
+> [LTPP-GITLAB 静态页](https://root.pages.ltpp.vip/ltpp-docs/LTPP-CODE-RUN)
