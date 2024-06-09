@@ -12,15 +12,7 @@ class Index
     public function Index(Request $request)
     {
         $ip = $request->getRealIp(true);
-        $header = $request->header();
-        $referer = '';
-        if (isset($header['referer']) && $header['referer']) {
-            $referer = $header['referer'];
-        }
-        if (isset($header['Referer']) && $header['Referer']) {
-            $referer = $header['Referer'];
-        }
-        $child_path = Base::getChildPpath($referer,  $ip);
+        $child_path = Base::getChildPpath($ip);
         $code = $request->post('code');
         $testin = $request->post('testin');
         $userlanguage = $request->post('language');

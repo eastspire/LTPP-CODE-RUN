@@ -34,14 +34,7 @@ class CrossDomain implements MiddlewareInterface
         if (!$header) {
             $header = [];
         }
-        $referer = '';
-        if (isset($header['referer']) && $header['referer']) {
-            $referer = $header['referer'];
-        }
-        if (isset($header['Referer']) && $header['Referer']) {
-            $referer = $header['Referer'];
-        }
-        if (!$referer || ($path && $path != '/')) {
+        if ($path && $path != '/') {
             return Base::notFoundPage($path);
         }
         return $response;

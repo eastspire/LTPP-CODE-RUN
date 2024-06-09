@@ -594,12 +594,11 @@ class Base
 
     /**
      * 获取getChildPpath
-     * @param string $referer
      * @param string $ip
      */
-    static public function getChildPpath($referer = '', $ip = '')
+    static public function getChildPpath($ip = '')
     {
-        return md5($referer . $ip);
+        return md5($ip);
     }
 
     /**
