@@ -1,14 +1,37 @@
 #!/bin/bash
-###
- # @Author: 18855190718 1491579574@qq.com
- # @Date: 2023-08-24 13:39:59
- # @LastEditors: 18855190718 1491579574@qq.com
- # @LastEditTime: 2023-10-08 07:55:39
- # @FilePath: \LTPP-CODE-RUN\web_up.sh
- # @Description: Email:1491579574@qq.com
- # QQ:1491579574
- # Copyright (c) 2023 by SQS, All Rights Reserved. 
-###
-scp -P 22 -rp -i C:\\Users\\14915\\.ssh\\LTPP\\id_rsa ./build/LTPP-CODE-RUN root@ltpp.vip:/tmp/
-echo "按回车键继续..."
+# Push the compiled single-file binary to the deployment host.
+#
+# Required environment:
+#   DEPLOY_HOST         target host, e.g. deploy@example.com
+#   DEPLOY_PORT         ssh port (defaults to 22)
+#   DEPLOY_SSH_KEY      absolute path to the SSH private key on the
+#                       operator's machine. Must be readable only by
+#                       the current user (chmod 600).
+#
+# The previous version of this script hardcoded the operator's local
+# Windows user directory and the on-disk location of the deploy key,
+# which leaks the operator's home directory layout to anyone reading
+# the public repository. It now requires the deploy key path to be
+# passed in via DEPLOY_SSH_KEY and refuses to run if it is unset or
+# world-readable.
+set -euo pipefail
+
+: "${DEPLOY_HOST:?DEPLOY_HOST is required, e.g. deploy@example.com}"
+DEPLOY_PORT="${DEPLOY_PORT:-22}"
+: "${DEPLOY_SSH_KEY:?DEPLOY_SSH_KEY is required, e.g. /home/you/.ssh/id_ed25519}"
+
+if [ ! -f "${DEPLOY_SSH_KEY}" ]; then
+    echo "DEPLOY_SSH_KEY points at a non-existent file: ${DEPLOY_SSH_KEY}" >&2
+    exit 1
+fi
+
+# Refuse to use a key that is group- or world-readable.
+KEY_PERMS=$(stat -c '%a' "${DEPLOY_SSH_KEY}" 2>/dev/null || stat -f '%Lp' "${DEPLOY_SSH_KEY}")
+case "${KEY_PERMS}" in
+    600|400) ;;
+    *) echo "Refusing to use ${DEPLOY_SSH_KEY} with permissions ${KEY_PERMS}; expected 600 or 400." >&2; exit 1 ;;
+esac
+
+scp -P "${DEPLOY_PORT}" -rp -i "${DEPLOY_SSH_KEY}" ./build/LTPP-CODE-RUN "${DEPLOY_HOST}:/tmp/"
+echo "Press Enter to continue..."
 read -n 1
